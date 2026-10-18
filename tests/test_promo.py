@@ -311,6 +311,36 @@ def test_rebuild_does_not_touch_existing_history(tmp_path):
     assert "2026-10-25" in json.load(open(tmp_path / "history.json"))  # new week: snapshot added
 
 
+# ---------------------------------------------------------------- long-term price database
+def test_price_db_records_each_week_once_and_keeps_everything(tmp_path):
+    import prices
+    _fixtures(tmp_path)
+    _build(tmp_path, tmp_path)
+    snap = json.load(open(tmp_path / "prices" / "2026-10-18.json"))
+    assert snap["dM1"][:3] == [1.25, 10.0, "kg"] and snap["dM1"][5] == 0.248   # promo row wins over the house row (keeps d)
+    assert snap["dW1"][0] == 3.0                                                # unparsed offers still give a regular price
+    prod = json.load(open(tmp_path / "prices" / "products.json"))
+    assert prod["dM1"][2] == "2026-10-18"
+    json.dump({"dM1": [9.99, 0, "", "", "", 0]}, open(tmp_path / "prices" / "2026-10-18.json", "w"))
+    _build(tmp_path, tmp_path)                                                  # same week: never overwritten
+    assert json.load(open(tmp_path / "prices" / "2026-10-18.json"))["dM1"][0] == 9.99
+    for i in range(14):                                                         # no pruning, unlike history.json
+        assert prices.record(str(tmp_path), f"2027-01-{i + 1:02d}", [dict(k="dM1", p=1.25)])
+    assert len(prices.load(str(tmp_path))) == 15 and json.load(open(tmp_path / "prices" / "products.json"))["dM1"][2] == "2026-10-18"
+
+
+def test_price_index_chains_and_ignores_pack_changes(tmp_path):
+    import prices
+    w = lambda *ps: [dict(k=k, p=p, c="dairy") for k, p in zip(("d1", "d2", "d3", "c1"), ps)]
+    prices.record(str(tmp_path), "2026-10-18", w(1.00, 2.00, 1.00, 5.00))
+    prices.record(str(tmp_path), "2026-10-25", w(1.10, 2.20, 3.00, 5.00))     # d3 tripled: pack change, ignored
+    prices.record(str(tmp_path), "2026-11-01", w(1.21, 2.42, 3.30, 4.50))
+    ch = prices.chain(prices.load(str(tmp_path)), prices.by_store("d"))
+    assert [round(i, 1) for _, i, _ in ch] == [100.0, 110.0, 121.0]            # d3: 3.00/1.00 dropped, then 3.30/3.00 kept
+    assert ch[1][2] == 2 and ch[2][2] == 3
+    assert "Carrefour: indice 90.0" in prices.report(str(tmp_path), brief=True)
+
+
 # ---------------------------------------------------------------- display names (presentation only)
 VOC = {"fumé", "extra", "vierge", "tomates", "piment", "lait"}
 

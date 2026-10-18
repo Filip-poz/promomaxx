@@ -1,4 +1,5 @@
 import json, re, sys, os, collections
+import prices
 from promo import parse_offer, unit, typeof, form_of, is_dish, match_ref, TYPES, FORM_LABEL, NO_COMPARE, display_name, name_vocab, fmt_size, pack_noun
 
 # python3 build.py [data-dir] [out-dir] [--rewrite-history]
@@ -166,13 +167,24 @@ if wk and (wk not in hist or REWRITE_HIST):
 else:
     print("history: unchanged (snapshot", wk, "already stored; --rewrite-history to replace it)")
 
+# long-term price database (prices/<week>.json, never pruned): promo items at regular price + house-brand lists
+rows = [dict(k=x["k"].split("-")[0], p=x["p"], v=x["v"], u=x["uu"], c=x["c"], t=x["t"], d=x["d"], n=x["n"], b=x["b"]) for x in items]
+for s, src in (("d", D["house"]), ("c", C["house"])):
+    for h in src:
+        code = h["code"] if s == "d" else h["id"]
+        un = unit(h.get("ppu") or "")
+        c = refine((D_MAP if s == "d" else C_MAP).get(h.get("cat"), "pantry"), h["name"])
+        rows.append(dict(k=s + code, p=h.get("price"), v=un[0] if un else None, u=un[1] if un else "", c=c,
+                         t=typeof(h["name"] + " " + h.get("brand", ""), c), n=clean_name(h["name"]), b=h.get("brand") or ("Delhaize" if s == "d" else "")))
+print("prices:", "snapshot " + wk + " written" if prices.record(SRC, wk, rows) else "unchanged (" + wk + " already stored)")
+
 # non-perishables worth stocking up on at >= 33 % off
 STOCK = ["papier","vaisselle","lessive","nettoyant","douche","mains","shampoing","deo","dentaire","rasage","pates","riz","huile",
          "tomates","asiatique","sauce-pates","cafe","the","chocolat","noix","tartiner","sucre","biere","bulles","vin","spiritueux",
          "cola","eau","bonbons","biscuits","barres","chips"]
 # category of each family (for the essentials editor), from this week's promos then house-brand lists
 tcat = {}
-for t in {x["t"] for x in items if x["t"]}:
+for t in sorted({x["t"] for x in items if x["t"]}):
     tcat[t] = collections.Counter(x["c"] for x in items if x["t"] == t).most_common(1)[0][0]
 tcat.update({"poulet": "meat", "saumon": "meat", "poisson": "meat"})
 
