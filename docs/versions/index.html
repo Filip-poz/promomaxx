@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historique des versions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f5f4f0; --surface:#ffffff; --sunk:#eeece6; --ink:#1c1d20; --muted:#585d66; --line:#e2dfd8;
+  --accent:#1c1d20; --accent-ink:#ffffff; --tag:#ffd84d; --tag-ink:#25210b; --focus:#2f5fd0;
+  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
+  --f-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121315; --surface:#1b1d20; --sunk:#232529; --ink:#eceef1; --muted:#a3a9b3; --line:#2d3036;
+  --accent:#eceef1; --accent-ink:#121315; --tag:#f5c518; --tag-ink:#17150b; --focus:#8fb0ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121315; --surface:#1b1d20; --sunk:#232529; --ink:#eceef1; --muted:#a3a9b3; --line:#2d3036;
+  --accent:#eceef1; --accent-ink:#121315; --tag:#f5c518; --tag-ink:#17150b; --focus:#8fb0ff; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;display:flex;flex-direction:column}
+header{background:var(--surface);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center}
+h1{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0;white-space:nowrap}
+.seg{display:flex;gap:4px;background:var(--sunk);border-radius:10px;padding:4px;overflow-x:auto;max-width:100%}
+.seg button{font:inherit;color:var(--ink);border:0;background:transparent;border-radius:7px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-weight:600;font-size:14px}
+.seg button small{font-weight:400;color:var(--muted);margin-left:6px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.75}
+.seg button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.note{flex:1 1 320px;min-width:0;color:var(--muted);font-size:14px}
+.note b{color:var(--ink);font-weight:600}
+.note code{font-size:12px;background:var(--tag);color:var(--tag-ink);border-radius:4px;padding:1px 5px;margin-right:6px}
+main{flex:1;position:relative;min-height:0}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg);display:none}
+iframe.on{display:block}
+.load{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted)}
+</style></head>
+<body>
+<header>
+  <h1>Historique des versions</h1>
+  <div class="seg" role="group" aria-label="Version" id="seg"></div>
+  <p class="note" id="note" aria-live="polite"></p>
+</header>
+<main id="stage"><p class="load">Chargement de la version…</p></main>
+<script>
+const V=[
+  {f:'v1.html',c:'a512ecb',t:'18/10 20:24',n:'Tableau des promos',d:'Première version : promos Delhaize vs Carrefour, comparaison avec la marque maison.'},
+  {f:'v2.html',c:'da81272',t:'18/10 20:57',n:'Calculs fiables',d:'Arithmétique des offres fiable, correspondance marque maison plus stricte, prix plus clairs.'},
+  {f:'v3.html',c:'e1b7326',t:'18/10 21:23',n:'Cartes revues',d:'Outils au survol, icône info, plus d’étiquettes de magasin, rayons multi-sélection, guide du jargon promo.'},
+  {f:'v4.html',c:'7e9fc23',t:'18/10 22:10',n:'Promomaxx',d:'Refonte autour de la décision d’achat (version actuelle).'}
+];
+const seg=document.getElementById('seg'),stage=document.getElementById('stage'),note=document.getElementById('note'),frames={};
+function show(i){
+  const v=V[i];
+  [...seg.children].forEach((b,j)=>b.setAttribute('aria-pressed',j===i));
+  note.innerHTML='<code>'+v.c+'</code><b>'+v.n+'</b> · '+v.d;
+  if(!frames[i]){const f=document.createElement('iframe');f.src=v.f;f.title=v.n;f.onload=()=>{const l=stage.querySelector('.load');if(l)l.remove()};stage.appendChild(f);frames[i]=f}
+  Object.entries(frames).forEach(([j,f])=>f.classList.toggle('on',+j===i));
+  try{localStorage.setItem('vh-sel',i)}catch(e){}
+}
+V.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML='v'+(i+1)+'<small>'+v.t.split(' ')[1]+'</small>';b.title=v.n+' ('+v.t+')';b.onclick=()=>show(i);seg.appendChild(b)});
+let s=V.length-1;try{const x=+localStorage.getItem('vh-sel');if(localStorage.getItem('vh-sel')!==null&&V[x])s=x}catch(e){}
+show(s);
+</script>
+</body></html>
