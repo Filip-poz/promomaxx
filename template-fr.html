@@ -28,10 +28,29 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
 .stale{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--warn-bg);color:var(--warn);font-weight:600;font-size:14px}
-.how{margin-top:12px;font-size:14px;max-width:80ch}
-.how summary{cursor:pointer;font-weight:600;color:var(--car);width:max-content}
-.how ol{margin:8px 0 0;padding-left:20px;display:grid;gap:6px;color:var(--muted)}
+.guides{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:flex-start}
+.how{font-size:14px}
+.how[open]{flex-basis:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 14px 14px}
+.how summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font:600 14px var(--f-body);color:var(--ink);background:var(--car-bg);border:1px solid var(--car);border-radius:999px;padding:7px 14px 7px 8px;margin-top:0}
+.how summary::-webkit-details-marker{display:none}
+.how summary:hover{background:color-mix(in srgb,var(--car) 18%,var(--surface))}
+.how[open] summary{background:none;border-color:transparent;padding-left:0;margin-top:6px}
+.how .gi{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--car);color:#fff;font:800 13px var(--f-body);flex:none}
+.lingo .gi{background:var(--tag);font-size:12px}
+.lingo summary{background:color-mix(in srgb,var(--tag) 18%,var(--surface));border-color:var(--tag)}
+.lingo summary:hover{background:color-mix(in srgb,var(--tag) 30%,var(--surface))}
+.how ol{margin:8px 0 0;padding-left:20px;display:grid;gap:6px;color:var(--muted);max-width:80ch}
 .how ol b{color:var(--ink)}
+.ii{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--car);color:#fff !important;font:700 11px var(--f-body);vertical-align:1px}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-top:10px}
+.lcard{position:relative;display:flex;flex-direction:column;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px 34px}
+.lcard b{font:700 13px var(--f-mono);background:var(--tag);color:var(--tag-ink);padding:3px 8px 3px 12px;clip-path:polygon(8px 0,100% 0,100% 100%,8px 100%,0 50%);align-self:flex-start}
+.lcard span{font-size:13px;color:var(--muted);line-height:1.35}
+.lcard em{position:absolute;left:12px;bottom:9px;font:700 13px var(--f-mono);font-style:normal;color:var(--good)}
+.lcard em::before{content:"Remise réelle ";font-weight:500;color:var(--muted)}
+.lingo h4{font-family:var(--f-display);font-size:16px;margin:16px 0 4px}
+.lingo ul{margin:0;padding-left:20px;display:grid;gap:6px;color:var(--muted);max-width:80ch}
+.lingo ul b{color:var(--ink)}
 header h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,5vw,40px);letter-spacing:-.02em;margin:0;text-wrap:balance}
 .weeks{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px;color:var(--muted);font-size:13px}
 .weeks b{color:var(--ink);font-weight:600}
@@ -139,6 +158,12 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 .card .tools{position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:5px}
 .card .tools button{box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .card .tools .hidebtn{background:var(--surface)}
+/* + and ✕ only on hover (always shown on touch screens); an item already in the basket keeps its ✓ */
+@media (hover:hover){
+  .card .tools button,.row .add button{opacity:0;transition:opacity .12s}
+  .card:hover .tools button,.card:focus-within .tools button,.row:hover .add button,.row:focus-within .add button,
+  .card .tools .addbtn[aria-pressed="true"],.row .add .addbtn[aria-pressed="true"],.hid .hidebtn{opacity:1}
+}
 .card .badges{position:absolute;top:8px;left:8px;right:48px;display:flex;flex-wrap:wrap;gap:4px}
 .cbody{padding:9px 10px 10px;display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
 .cn{font-weight:600;font-size:14px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:inherit;text-decoration:none;overflow-wrap:anywhere}
@@ -151,6 +176,8 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 .cvd{font-size:12px;line-height:1.35}
 .cvd .verdict{display:inline-block;padding:1px 6px;margin-bottom:2px}
 .cref{font-size:11.5px;color:var(--muted);margin-top:3px}
+.cref .nw{white-space:nowrap}
+.cref .ibtn{margin-left:4px;width:16px;height:16px;font-size:11px}
 .cref .ring{width:9px;height:9px;border-width:2px;margin-right:4px;vertical-align:0}
 .cref b{font-family:var(--f-mono);color:var(--ink)}
 @media (max-width:640px){
@@ -245,15 +272,15 @@ footer p{margin:6px 0}
 .st.d{color:var(--dlh)} .st.c{color:var(--car)}
 .verdict.none{color:var(--muted);background:var(--bg);border:1px solid var(--line);font-weight:500}
 .verdict.same{color:var(--ink);background:var(--bg);border:1px solid var(--line)}
-details.why{font-size:12px;color:var(--muted);margin-top:2px}
-details.why>summary{cursor:pointer;font-weight:600;color:var(--car);width:max-content;list-style:none}
-details.why>summary::-webkit-details-marker{display:none}
-details.why>summary::before{content:"▸ ";font-size:10px}
-details.why[open]>summary::before{content:"▾ "}
-details.why ul{margin:4px 0 0;padding-left:16px;display:grid;gap:3px}
-details.why b{color:var(--ink);font-weight:600}
-details.why a{color:inherit}
-.hbline details.why{flex-basis:100%}
+.ibtn{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:0;background:var(--car);color:#fff;font:700 12px/1 var(--f-body);font-style:normal;cursor:pointer;padding:0;margin-left:6px;vertical-align:1px;flex:none}
+.ibtn:hover{filter:brightness(1.12)}
+.ibtn[aria-expanded="true"]{background:var(--ink);color:var(--bg)}
+.whyp{display:none;font-size:12px;color:var(--muted);margin:6px 0 0;padding:6px 8px 6px 22px;gap:3px;background:var(--bg);border-radius:8px}
+.whyopen .whyp{display:grid}
+.whyp b{color:var(--ink);font-weight:600}
+.whyp a{color:inherit}
+.hbline .whyp{flex-basis:100%}
+.hbline .ibtn{margin-left:-4px}
 .reason{font:600 12px var(--f-body);color:var(--good);background:var(--good-bg);border-radius:6px;padding:3px 7px;line-height:1.3}
 
 /* compact header stats */
@@ -305,17 +332,39 @@ details.why a{color:inherit}
     <div class="weeks" id="weeks"></div>
     <p class="stale" id="stale" hidden></p>
     <div class="stats" id="summary" aria-label="La semaine en un coup d'œil"></div>
+    <div class="guides">
     <details class="how" id="how">
-      <summary>Comment ça marche</summary>
+      <summary><span class="gi" aria-hidden="true">?</span>Comment ça marche</summary>
       <ol>
         <li><b>Chaque semaine</b>, les promos Delhaize et le folder Carrefour Market sont relevés sur les sites des magasins. Les offres expirées disparaissent toutes seules.</li>
         <li><b>Prix affiché :</b> ce que vous payez pour la quantité exigée par l'offre (« 13,98 € les 3 »), le prix par unité et au kilo ou au litre qui en découle, et le prix habituel.</li>
         <li><b>Vraie affaire :</b> la promo coûte au moins 15 % de moins, au kilo, au litre ou à la pièce, que la marque maison la moins chère du même format dans le même magasin. Sans référence fiable, la page affiche « Pas de comparaison fiable » et ne met pas la promo en avant.</li>
         <li><b>Mes essentiels</b> part d'une liste de courses type. Touchez « Modifier mes essentiels » pour cocher vos produits, ou « Tout effacer » pour partir de zéro.</li>
-        <li><b>+</b> ajoute au panier la quantité exigée par l'offre : une liste de courses rangée par rayon, à cocher en magasin ou à copier. <b>✕</b> masque une promo qui ne vous intéresse pas.</li>
+        <li><b>+</b> (au survol d'une promo) ajoute au panier la quantité exigée par l'offre : une liste de courses rangée par rayon, à cocher en magasin ou à copier. <b>✕</b> masque une promo qui ne vous intéresse pas. Le <b class="ii">i</b> à côté de la marque maison détaille le calcul.</li>
         <li><b>Nutri-Boost</b> (carte SuperPlus Delhaize) : réglage dans « Filtres et tri ». Laissez-le activé si vous l'avez.</li>
       </ol>
     </details>
+    <details class="how lingo" id="lingo">
+      <summary><span class="gi" aria-hidden="true">🏷️</span>Décoder le jargon des promos</summary>
+      <div class="lgrid">
+        <div class="lcard"><b>−25 %</b><span>Vous payez 75 % du prix, dès le premier paquet.</span><em>−25 %</em></div>
+        <div class="lcard"><b>1+1 gratuit</b><span>2 pour le prix d'1. Imbattable, mais il faut en prendre 2.</span><em>−50 %</em></div>
+        <div class="lcard"><b>2+1 gratuit</b><span>3 pour le prix de 2.</span><em>−33 %</em></div>
+        <div class="lcard"><b>3+1 gratuit</b><span>4 pour le prix de 3. Même remise que « −25 % », mais avec 4 paquets sous le bras.</span><em>−25 %</em></div>
+        <div class="lcard"><b>2e à −50 %</b><span>La remise ne porte que sur le 2e. Sur les deux, elle est deux fois plus petite que le chiffre affiché.</span><em>−25 %</em></div>
+        <div class="lcard"><b>3e à −60 %</b><span>Même principe, répartie sur 3 paquets.</span><em>−20 %</em></div>
+        <div class="lcard"><b>3 pour 5 €</b><span>Comparez à 3 fois le prix habituel. Le prix rond donne l'impression d'une affaire, sans garantie.</span><em>selon le prix</em></div>
+      </div>
+      <h4>Pourquoi « 2e à −50 % » plutôt que « −25 % » ?</h4>
+      <ul>
+        <li><b>Le gros chiffre attire l'œil.</b> « −50 % » sonne deux fois mieux que « −25 % », pour la même remise.</li>
+        <li><b>Vous repartez avec plus.</b> Le multi-achat fait sortir 2 ou 3 paquets au lieu d'un. Ce qui dort dans votre placard, vous ne l'achèterez pas chez le concurrent la semaine suivante.</li>
+        <li><b>La marque paie souvent.</b> Les offres en volume sont en grande partie financées par les fabricants, qui achètent ainsi du volume et de la place en rayon.</li>
+        <li><b>La remise simple, pour ce qui ne se stocke pas.</b> Personne n'achète 4 salades ou 3 poulets frais : pour le frais, et pour les prix d'appel du folder qui font venir en magasin, le « −25 % » reste roi.</li>
+        <li><b>Le bon réflexe :</b> regarder le prix au kilo ou au litre et l'écart avec la marque maison. La page fait le calcul pour vous.</li>
+      </ul>
+    </details>
+    </div>
   </header>
 
   <div class="bar" id="bar">
@@ -352,7 +401,7 @@ details.why a{color:inherit}
   <main id="view"></main>
 
   <footer>
-    <p><b>Trois chiffres distincts :</b> la <b>remise</b> (« soit −33 % ») compare le prix de l'offre au prix habituel du même produit, pour la même quantité. L'écart avec la <b>marque maison</b> (« 20 % sous la marque maison ») compare le prix au kilo, au litre ou à la pièce à la référence maison la moins chère du même format, dans le même magasin. Dans « Les meilleures affaires », à format égal, la promo au <b>prix unitaire le plus bas</b> passe en premier.</p>
+    <p><b>Trois chiffres distincts :</b> la <b>remise</b> (dans le détail du calcul) compare le prix de l'offre au prix habituel du même produit, pour la même quantité. L'écart avec la <b>marque maison</b> (« 20 % sous la marque maison ») compare le prix au kilo, au litre ou à la pièce à la référence maison la moins chère du même format, dans le même magasin. Dans « Les meilleures affaires », à format égal, la promo au <b>prix unitaire le plus bas</b> passe en premier.</p>
     <p><b>Calcul :</b> on paie la quantité exigée par l'offre. 1+1 = 2 pour le prix d'1 (−50 %), 2+1 = −33 %, 2e à −50 % = −25 %, 3e à −60 % = −20 %, « 3 pour 5 € » et « −6,99 € à l'achat de 3 » comparés à 3 fois le prix habituel. Quand l'offre peut porter sur un mélange de produits, le calcul suppose plusieurs exemplaires du même produit. Une offre illisible est affichée telle quelle, sans calcul.</p>
     <p><b>Marque maison :</b> le produit Delhaize ou Carrefour (Carrefour, Classic, Simpl, No Brand…) le moins cher de la même famille, du même format (capsules ou moulu, liquide ou tablettes, sirop ou boisson, riz sec ou cuit…) et de la même unité, à son prix habituel. Les plats préparés ne servent jamais de référence pour un ingrédient. Une marque maison en promo n'est comparée qu'à une autre marque maison. En cas de doute : « Pas de comparaison fiable ».</p>
     <p><b>Nutri-Boost :</b> −10 % chez Delhaize sur les produits Nutri-Score A et B à prix normal. D'après nos tickets de caisse, il ne se cumule pas avec une promo. Le bouton applique donc les −10 % aux produits de marque maison Delhaize notés A ou B.</p>
@@ -455,7 +504,7 @@ function setSync(s){ const el=document.getElementById("sync"); if (el) el.textCo
 })();
 
 const ST = () => P.staples || DATA.staples;
-let state = {view:"staples", store:"all", cat:"all", q:"", sort:"beat", min:0, f:{}, open:{}, edit:false, topOpen:true, fopen:false};
+let state = {view:"staples", store:"all", cats:[], q:"", sort:"beat", min:0, f:{}, open:{}, edit:false, topOpen:true, fopen:false};
 
 // ---- house-brand verdict ----
 // Three separate ideas: x.d = discount vs the product's own regular price; x.beat = advantage vs a valid same-store
@@ -493,8 +542,7 @@ function priceHTML(x){
   if (!x.ok) return `<div class="pblk"><div class="ptot">${eur(x.p)}</div><div class="preg">Prix habituel${x.v?` · ${per(x.v,x.uu)}`:""}</div><div class="pcond warn">Offre non interprétée : voir le magasin</div></div>`;
   if (x.q>1) return `<div class="pblk"><div class="ptot">${eur(x.tot)} <span class="pq">les ${x.q}</span></div>
     <div class="psub">${eur(x.pe)} / unité${x.ev?` · ${per(x.ev,x.uu)}`:""}</div>
-    <div class="preg">Prix habituel : ${eur(x.p)} / unité</div>
-    <div class="pcond">Acheter ${x.q} pour bénéficier de l'offre</div></div>`;
+    <div class="preg">Prix habituel : ${eur(x.p)} / unité</div></div>`;
   return `<div class="pblk"><div class="ptot">${eur(x.tot)}</div>${x.ev?`<div class="psub">${per(x.ev,x.uu)}</div>`:""}<div class="preg">Prix habituel : ${eur(x.p)}</div></div>`;
 }
 const NR = {type:"famille de produit non reconnue", unit:"le magasin ne donne pas de prix au kilo, au litre ou à la pièce",
@@ -513,12 +561,13 @@ function detailsHTML(x){
   else li.push(`Pas de comparaison fiable : ${x.ok ? NR[x.nr]||NR.none : "offre non interprétée"}.`);
   if (other) li.push(`Chez ${STORE[o]} (pour info) : <a href="${esc(other.l)}" target="_blank" rel="noopener">${esc(other.n)}</a>, ${per(rv(other),other.u)}.`);
   if (x.hb) li.push(`Produit de marque maison : sa remise porte sur son propre prix. Il n'est comparé qu'à une autre marque maison du même format.`);
-  return `<details class="why"><summary>Détails du calcul</summary><ul>${li.map(l=>`<li>${l}</li>`).join("")}</ul></details>`;
+  return `<ul class="whyp">${li.map(l=>`<li>${l}</li>`).join("")}</ul>`;
 }
+const infoBtn = x => `<button class="ibtn" data-why="1" aria-expanded="false" aria-label="Détails du calcul : ${esc(x.n)}" title="Détails du calcul">i</button>`;
 function hbLine(x){
   const same = refOf(x, x.s), other = refOf(x, x.s==="d"?"c":"d");
   const parts = [verdictTxt(x)];
-  if (same) parts.push(refChip(same, x.s));
+  if (same) parts.push(refChip(same, x.s) + infoBtn(x)); else parts.push(infoBtn(x));
   if (other) parts.push(refChip(other, x.s==="d"?"c":"d"));
   return `<div class="hbline">${parts.join("")}${detailsHTML(x)}</div>`;
 }
@@ -543,8 +592,6 @@ const toolBtns = x => {
     `<button class="hidebtn" data-hide="${x.id}" aria-label="${hid?"Réafficher":"Masquer"} : ${esc(x.n)}" title="${hid?"Réafficher":"Masquer cette promo"}">${hid?"↺":"✕"}</button>`;
 };
 
-const storeLbl = x => `<span class="st ${x.s}">${STORE[x.s]}</span>`;
-const effTxt = x => x.ok ? `<span class="eff">soit −${pct(x.d)}</span>` : "";
 function cardHTML(x){
   const r = refOf(x, x.s);
   return `<article class="card ${x.s}${P.hidden[x.id]?" hid":""}">
@@ -552,20 +599,20 @@ function cardHTML(x){
     <div class="badges">${badges(x)}</div>
     <div class="tools">${toolBtns(x)}</div>
     <div class="cbody">
-      ${x.why1?`<div class="reason">${x.why1}</div>`:""}
+      ${x.why1?`<div class="reason">${x.why1}${infoBtn(x)}</div>`:""}
       <a class="cn" href="${esc(x.l)}" target="_blank" rel="noopener" title="${esc(x.n)}">${esc(x.n)}</a>
-      <div class="cb">${storeLbl(x)} · ${esc(x.b)}${x.z?` · ${esc(x.z)}`:""}${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}</div>
-      <div class="cdeal"><span class="tag">${esc(x.pr)}</span>${effTxt(x)}</div>
+      <div class="cb">${esc(x.b)}${x.z?` · ${esc(x.z)}`:""}${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}</div>
+      <div class="cdeal"><span class="tag">${esc(x.pr)}</span></div>
       <div class="cprice">${priceHTML(x)}</div>
-      <div class="cvd">${x.why1?"":verdictTxt(x)}${r&&!x.why1?`<div class="cref"><span class="ring ${x.s}"></span>Marque maison <b>${num(rv(r))} €/${uLbl(r.u,x.t)}</b>${P.nb&&r.nb?' <span class="nbtag">NB</span>':""}</div>`:""}${detailsHTML(x)}</div>
+      <div class="cvd">${x.why1?"":verdictTxt(x)}${r&&!x.why1?`<div class="cref"><span class="ring ${x.s}"></span>Marque maison <span class="nw"><b>${num(rv(r))} €/${uLbl(r.u,x.t)}</b>${P.nb&&r.nb?' <span class="nbtag">NB</span>':""}${infoBtn(x)}</span></div>`:x.why1?"":infoBtn(x)}${detailsHTML(x)}</div>
     </div>
   </article>`;
 }
 function rowHTML(x){
   return `<div class="row ${x.s}${P.hidden[x.id]?" hid":""}">
     <a class="ph" href="${esc(x.l)}" target="_blank" rel="noopener" aria-label="Voir ${esc(x.n)} sur le site ${STORE[x.s]}">${x.img?`<img src="${x.img}" alt="" loading="lazy">`:`<span aria-hidden="true">${emOf(x)}</span>`}</a>
-    <div class="name">${x.why1?`<div class="reason" style="margin-bottom:3px">${x.why1}</div>`:""}<div class="t"><a href="${esc(x.l)}" target="_blank" rel="noopener">${esc(x.n)}</a>${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}${x.hb?'<span class="mark">marque maison</span>':""}${badges(x)}</div><div class="b">${storeLbl(x)} · ${esc(x.b)}${x.z?` · ${esc(x.z)}`:""} · ${emOf(x)} ${CATS[x.c][1]}${endTxt(x)}</div></div>
-    <div class="deal"><span class="tag">${esc(x.pr)}</span>${effTxt(x)}</div>
+    <div class="name">${x.why1?`<div class="reason" style="margin-bottom:3px">${x.why1}</div>`:""}<div class="t"><a href="${esc(x.l)}" target="_blank" rel="noopener">${esc(x.n)}</a>${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}${x.hb?'<span class="mark">marque maison</span>':""}${badges(x)}</div><div class="b">${esc(x.b)}${x.z?` · ${esc(x.z)}`:""} · ${emOf(x)} ${CATS[x.c][1]}${endTxt(x)}</div></div>
+    <div class="deal"><span class="tag">${esc(x.pr)}</span></div>
     <div class="add">${toolBtns(x)}</div>
     <div class="price">${priceHTML(x)}</div>
     ${hbLine(x)}
@@ -614,7 +661,7 @@ function scope(base){
     (state.store==="all"||x.s===state.store) && (!q || q.split(/\s+/).every(w=>x.hay.includes(w))));
 }
 const quick = x => (x.d||0)*100 >= state.min-.5 && FILTERS.every(([k,,fn])=>!state.f[k] || fn(x));
-const filtered = base => scope(base).filter(x=>(state.cat==="all"||x.c===state.cat) && quick(x));
+const filtered = base => scope(base).filter(x=>(!state.cats.length||state.cats.includes(x.c)) && quick(x));
 function sorter(a,b){
   if (state.sort==="beat") return rank(b)-rank(a) || (b.d||0)-(a.d||0);
   if (state.sort==="disc") return (b.d??-1)-(a.d??-1) || b.save-a.save;
@@ -631,10 +678,10 @@ function renderPills(base){
   const nHidden = base.filter(x=>!x.gone && P.hidden[x.id] && (state.store==="all"||x.s===state.store)).length;
   const pill = (attr, val, label, on, n) => `<button class="pill" ${attr}="${val}" aria-pressed="${on}">${label}${n!=null?`<span class="n">${n}</span>`:""}</button>`;
   const sel = (id, lb, opts, cur, on, short) => `<label class="pill sel" aria-pressed="${on}"><span class="lb opt">${lb}</span><span class="v${short?" d":""}">${esc(opts.find(o=>o[0]===cur)[1])}</span>${short?`<span class="v m">${short}</span>`:""}<select id="${id}" aria-label="${lb}">${opts.map(([k,l])=>`<option value="${k}"${k===cur?" selected":""}>${l}</option>`).join("")}</select></label>`;
-  const cat = state.cat==="all" ? "Tous" : CATS[state.cat][0]+" "+CATS[state.cat][1];
+  const nc = state.cats.length, cat = nc===1 ? CATS[state.cats[0]][0]+" "+CATS[state.cats[0]][1] : `${nc} rayons`;
   document.getElementById("pills").innerHTML =
     `<div class="prow sels">` + sel("sort","Trier :",SORTS,state.sort,false) +
-    `<button class="pill dd" data-catp="1" aria-expanded="${!!state.catOpen}" aria-controls="chips" aria-pressed="${state.cat!=="all"}"><span class="lb opt">Rayon :</span> <span class="v">${state.cat==="all"?`<span class="v d">Tous</span><span class="v m">Tous rayons</span>`:cat}</span></button>` +
+    `<button class="pill dd" data-catp="1" aria-expanded="${!!state.catOpen}" aria-controls="chips" aria-pressed="${nc>0}"><span class="lb opt">Rayon :</span> <span class="v">${!nc?`<span class="v d">Tous</span><span class="v m">Tous rayons</span>`:cat}</span></button>` +
     sel("min","Remise :",[[0,"toutes"],...MINS],state.min,state.min>0,state.min?`−${state.min} %+`:"Remise") +
     `</div><span class="sep"></span><div class="prow flts">` +
     FILTERS.filter(([k])=>k!=="nw"||DATA.hist).map(([k,l,fn])=>pill("data-flt",k,l,!!state.f[k],sc.filter(fn).length)).join("") +
@@ -642,7 +689,7 @@ function renderPills(base){
 }
 function activeFilters(){
   const a = [];
-  if (state.cat!=="all") a.push(["cat", CATS[state.cat][0]+" "+CATS[state.cat][1]]);
+  state.cats.forEach(k=>a.push(["cat:"+k, CATS[k][0]+" "+CATS[k][1]]));
   if (state.min) a.push(["min", `−${state.min} % et plus`]);
   FILTERS.forEach(([k,l])=>{ if (state.f[k]) a.push(["f:"+k, l]); });
   if (state.f.hidden) a.push(["f:hidden","Promos masquées"]);
@@ -662,8 +709,8 @@ function renderChips(base){
   const counts = {}; sc.forEach(x=>counts[x.c]=(counts[x.c]||0)+1);
   const el = document.getElementById("chips"); el.hidden = !state.catOpen;
   el.innerHTML =
-    `<button class="chip" data-cat="all" aria-pressed="${state.cat==="all"}"><span class="em">🛒</span>Tous les rayons<span class="n">${sc.length}</span></button>` +
-    CAT_ORDER.filter(k=>counts[k]||state.cat===k).map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cat===k}"><span class="em">${CATS[k][0]}</span>${CATS[k][1]}<span class="n">${counts[k]||0}</span></button>`).join("");
+    `<button class="chip" data-cat="all" aria-pressed="${!state.cats.length}"><span class="em">🛒</span>Tous les rayons<span class="n">${sc.length}</span></button>` +
+    CAT_ORDER.filter(k=>counts[k]||state.cats.includes(k)).map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cats.includes(k)}"><span class="em">${CATS[k][0]}</span>${CATS[k][1]}<span class="n">${counts[k]||0}</span></button>`).join("");
 }
 
 function renderHeader(){
@@ -751,7 +798,7 @@ function render(){
         return `<section class="group"><h3>${em} ${esc(label)}
           ${b?`<span class="winner ${b.s}"><span class="ring ${b.s}"></span>Meilleure affaire : ${STORE[b.s]}, ${esc(b.pr)}, ${pct(b.beat)} sous sa marque maison</span>`:`<span class="hint">aucune vraie affaire vérifiée</span>`}
           <span class="hint">${items.length} offre${items.length>1?"s":""}${stores.size===1?` · uniquement chez ${STORE[all[0].s]}`:""}</span></h3>
-          ${rd||rc?`<div class="ghb">Marque maison la moins chère de la famille : ${rd?refChip(rd,"d"):""} ${rc?refChip(rc,"c"):""}${differs?`<span>Chaque promo est comparée à la référence de son propre format (voir « Détails du calcul »).</span>`:""}</div>`:""}
+          ${rd||rc?`<div class="ghb">Marque maison la moins chère de la famille : ${rd?refChip(rd,"d"):""} ${rc?refChip(rc,"c"):""}${differs?`<span>Chaque promo est comparée à la référence de son propre format (voir le i à côté de la marque maison).</span>`:""}</div>`:""}
           ${itemsHTML(shown)}
           ${items.length>per?`<button class="more" data-more="${k}">${state.open[k]?"Afficher moins":"Voir les "+items.length+" offres"}</button>`:""}</section>`;
       }).join("") : stap.size ? `<p class="empty">Aucun de vos essentiels ne correspond à ces filtres.</p>`
@@ -820,18 +867,19 @@ function toTop(){ const b=document.getElementById("bar"); if (b.getBoundingClien
 document.addEventListener("click", e=>{
   const t = e.target.closest("button"); if (!t) return;
   const d = t.dataset;
-  if (d.view){ state.view=d.view; state.cat="all"; state.edit=false; render(); return; }
-  if (d.store){ state.store=d.store; state.cat="all"; render(); return; }
+  if (d.why){ const o = t.getAttribute("aria-expanded")!=="true"; t.setAttribute("aria-expanded", o); t.closest(".card,.row").classList.toggle("whyopen", o); return; }
+  if (d.view){ state.view=d.view; state.cats=[]; state.edit=false; render(); return; }
+  if (d.store){ state.store=d.store; state.cats=[]; render(); return; }
   if (d.mode){ MODE=d.mode; try{ localStorage.setItem("promo-mode",MODE); }catch(_){} render(); return; }
   if (d.catp){ state.catOpen=!state.catOpen; render(); return; }
-  if (d.cat){ state.cat=d.cat; state.catOpen=false; render(); return; }
+  if (d.cat){ if (d.cat==="all") state.cats=[]; else { const i=state.cats.indexOf(d.cat); i<0 ? state.cats.push(d.cat) : state.cats.splice(i,1); } render(); return; }
   if (d.sort){ state.sort=d.sort; render(); return; }
   if (d.min){ state.min = state.min===+d.min ? 0 : +d.min; render(); return; }
-  if (d.flt){ state.f[d.flt]=!state.f[d.flt]; state.cat="all"; render(); return; }
+  if (d.flt){ state.f[d.flt]=!state.f[d.flt]; state.cats=[]; render(); return; }
   if (d.go==="top"){ state.view="staples"; state.edit=false; state.topOpen=true; render(); const el=document.getElementById("topd"); if (el) el.scrollIntoView({block:"start"}); return; }
-  if (d.go){ state.view="all"; state.cat="all"; state.f={[d.go]:true}; state.min=0; if (d.go==="beat") state.sort="beat"; state.edit=false; render(); toTop(); return; }
+  if (d.go){ state.view="all"; state.cats=[]; state.f={[d.go]:true}; state.min=0; if (d.go==="beat") state.sort="beat"; state.edit=false; render(); toTop(); return; }
   if (d.fopen){ state.fopen=!state.fopen; render(); return; }
-  if (d.unf){ if (d.unf==="all"){ state.cat="all"; state.min=0; state.f={}; } else if (d.unf==="cat") state.cat="all"; else if (d.unf==="min") state.min=0; else delete state.f[d.unf.slice(2)]; render(); return; }
+  if (d.unf){ if (d.unf==="all"){ state.cats=[]; state.min=0; state.f={}; } else if (d.unf.startsWith("cat:")) state.cats=state.cats.filter(k=>k!==d.unf.slice(4)); else if (d.unf==="min") state.min=0; else delete state.f[d.unf.slice(2)]; render(); return; }
   if (d.setq){ P.basket[d.setq]=+d.n; save(); render(); return; }
   if (d.more){ state.open[d.more]=!state.open[d.more]; render(); return; }
   if (d.ed){
