@@ -1,0 +1,14 @@
+# raw weekly scrapes (store data, regenerated every Thursday)
+delhaize-fr.json
+delhaize-nutriscore.json
+carrefour-fr.json
+carrefour-photos.json
+# personal project notes
+CLAUDE.md
+.claude/
+# build by-products (docs/index.html is the published site)
+docs/data.json
+docs/promo-board.html
+data.json
+promo-board.html
+.DS_Store
