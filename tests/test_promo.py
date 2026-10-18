@@ -297,6 +297,8 @@ def test_build_end_to_end(tmp_path):
     assert odd["ok"] == 0 and odd["d"] is None and "tot" not in odd and odd["raw"] == "Prix choc"
     html = open(os.path.join(tmp_path, "index.html")).read()
     assert "__DATA__" not in html and "<!doctype html>" in html
+    trend = json.load(open(os.path.join(tmp_path, "data.json")))["trend"]   # first week: tab shows its "next week" state
+    assert len(trend["w"]) == 1 and trend["up"] == [] and 'data-view="trend"' in html
 
 
 def test_rebuild_does_not_touch_existing_history(tmp_path):
@@ -339,6 +341,31 @@ def test_price_index_chains_and_ignores_pack_changes(tmp_path):
     assert [round(i, 1) for _, i, _ in ch] == [100.0, 110.0, 121.0]            # d3: 3.00/1.00 dropped, then 3.30/3.00 kept
     assert ch[1][2] == 2 and ch[2][2] == 3
     assert "Carrefour: indice 90.0" in prices.report(str(tmp_path), brief=True)
+
+
+def test_trend_summary_is_compact_and_flags_movers_and_shrinkflation():
+    import prices
+    row = lambda p, v=None, t="pates", c="pantry": [p, v, "kg" if v else "", c, t, 0]
+    weeks = {
+        "2026-10-18": {"d1": row(1.00), "d2": row(2.00, 4.00), "d3": row(1.00, t="vin", c="wine"), "d4": row(1.00, t="vin", c="wine"),
+                       "c1": row(5.00), "c9": row(1.00)},
+        "2026-10-25": {"d1": row(1.10), "d2": row(2.00, 4.40), "d3": row(1.00, t="vin", c="wine"), "d4": row(3.00, t="vin", c="wine"),
+                       "c1": row(4.50)},
+        "2026-11-01": {"d1": row(1.21), "d2": row(2.00, 4.40), "d3": row(0.90, t="vin", c="wine"), "d4": row(3.00, t="vin", c="wine"),
+                       "c1": row(4.50)},
+    }
+    prod = {"d1": ["Spaghetti", "Barilla", "2026-10-18"], "d3": ["Rioja", "", "2026-10-18"]}
+    t = prices.summary(weeks, prod, ["pates"], top=5)
+    assert t["w"] == sorted(weeks) and t["idx"]["c"] == [100.0, 90.0, 90.0]
+    assert t["up"][0] == ["d1", 1.21] and ["d3", 0.9] in t["down"] and ["c1", 0.9] in t["down"]
+    assert all(k != "d4" for k, _ in t["up"])                                  # tripled = pack change, never a mover
+    assert t["shrink"] == [["d2", 4.0, 4.4, 2.0]]                              # same price, €/kg up 10 %
+    assert t["s"]["d1"] == ["Spaghetti", "Barilla", "pates", "", [1.0, 1.1, 1.21]]
+    assert "c9" not in t["s"]                                                  # gone for good, unchanged: not shipped
+    assert t["cats"] == {}                                                     # < 5 products per rayon: no rayon index
+    assert prices.summary({}, {})["w"] == []
+    one = prices.summary({"2026-10-18": weeks["2026-10-18"]}, {})
+    assert one["n"] == {"d": 4, "c": 2} and one["up"] == [] and one["s"] == {}
 
 
 # ---------------------------------------------------------------- display names (presentation only)

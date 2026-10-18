@@ -189,7 +189,12 @@ for t in sorted({x["t"] for x in items if x["t"]}):
 tcat.update({"poulet": "meat", "saumon": "meat", "poisson": "meat"})
 
 types_out = {k: [e, l] for k, e, l, *_ in TYPES}
-out = dict(items=items, cats=CATS, types=types_out, staples=STAPLES, stock=STOCK, tcat=tcat, hist=bool(prevs), pulled=D.get("pulled"))
+# price trends ("Tendances" tab): store and rayon indices, top movers, possible shrinkflation, staple-family series
+try: PROD = json.load(open(f"{SRC}/prices/products.json"))
+except (OSError, ValueError): PROD = {}
+trend = prices.summary(prices.load(SRC), PROD, STAPLES)
+print("trend:", len(trend["w"]), "week(s),", len(trend["s"]), "series")
+out = dict(items=items, cats=CATS, types=types_out, staples=STAPLES, stock=STOCK, tcat=tcat, hist=bool(prevs), pulled=D.get("pulled"), trend=trend)
 json.dump(out, open(f"{OUT}/data.json", "w"), ensure_ascii=False, separators=(",", ":"))
 tpl = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "template-fr.html")).read()
 html = tpl.replace("__DATA__", json.dumps(out, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))

@@ -124,6 +124,54 @@ def report(data_dir, since=None, brief=False):
     return "\n".join(lines)
 
 
+def summary(weeks, prod, families=(), top=10, fam_cap=300, recent=4):
+    """Compact trend data for the board's "Tendances" tab (the full DB never goes into the page).
+    w: weeks; idx/n: chained index and products compared per store; cats: {cat: {store: series or None}};
+    s: {k: [name, brand, family, unit, prices aligned on w (None = not seen)]} for movers and changed items of `families`;
+    up/down: [k, ratio] first vs last price seen (last seen in the `recent` latest weeks); shrink: [k, v0, v1, price]."""
+    ws = sorted(weeks)
+    out = dict(w=ws, idx={}, n={}, cats={}, s={}, up=[], down=[], shrink=[])
+    if not ws: return out
+    r1 = lambda x: round(x, 1)
+    for s in STORE:
+        ch = chain(weeks, by_store(s))
+        out["idx"][s] = [r1(i) for _, i, _ in ch]
+        out["n"][s] = ch[-1][2] if len(ch) > 1 else sum(k.startswith(s) for k in weeks[ws[-1]])
+    cats = sorted({row[3] for v in weeks.values() for row in v.values() if row[3]})
+    for c in cats:
+        e = {}
+        for s in STORE:
+            ch = chain(weeks, by_cat(s, c))
+            e[s] = [r1(i) for _, i, _ in ch] if len(ch) > 1 and min(n for _, _, n in ch[1:]) >= 5 else None
+        if any(e.values()): out["cats"][c] = e
+    obs = collections.defaultdict(list)  # k -> [(week index, row)]
+    for i, w in enumerate(ws):
+        for k, row in weeks[w].items(): obs[k].append((i, row))
+    live = [k for k, o in obs.items() if len(o) >= 2 and o[-1][0] >= len(ws) - recent]
+    mv = {}
+    for k in live:
+        r = obs[k][-1][1][0] / obs[k][0][1][0]
+        if LO <= r <= HI and abs(r - 1) >= 0.005: mv[k] = r
+    srt = sorted(mv.items(), key=lambda kv: kv[1])
+    out["up"] = [[k, round(r, 4)] for k, r in srt[::-1][:top] if r > 1]
+    out["down"] = [[k, round(r, 4)] for k, r in srt[:top] if r < 1]
+    for k in live:
+        (_, a), (_, b) = obs[k][0], obs[k][-1]
+        if a[1] and b[1] and a[2] == b[2] and abs(b[0] - a[0]) < 0.01 and b[1] > a[1] * 1.03:
+            out["shrink"].append([k, a[1], b[1], b[0]])
+    out["shrink"].sort(key=lambda x: -x[2] / x[1])
+    out["shrink"] = out["shrink"][:top]
+    fam = set(families)
+    keep = [k for k, _ in out["up"] + out["down"]] + [x[0] for x in out["shrink"]]
+    keep += sorted((k for k in mv if obs[k][-1][1][4] in fam and k not in keep), key=lambda k: -abs(mv[k] - 1))[:fam_cap]
+    for k in keep:
+        p = [None] * len(ws)
+        for i, row in obs[k]: p[i] = row[0]
+        last = obs[k][-1][1]
+        out["s"][k] = (prod.get(k) or ["", ""])[:2] + [last[4], last[2], p]
+    return out
+
+
 def to_csv(data_dir, path):
     weeks, prod = load(data_dir), {}
     try: prod = json.load(open(os.path.join(data_dir, "prices", "products.json")))
