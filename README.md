@@ -1,14 +1,14 @@
-# Tableau des promos
+# Promomaxx
 
-Les promos de la semaine chez **Delhaize** et **Carrefour Market** (Belgique), comparées à la marque maison la moins chère du même magasin, au kilo, au litre ou à la pièce.
+Les promos de la semaine chez **Delhaize** et **Carrefour Market** (Belgique), comparées au produit de marque du magasin le moins cher, dans le même magasin, au kilo, au litre ou à la pièce.
 
 **Site :** https://filip-poz.github.io/tableau-des-promos/
 
 ## Ce que fait la page
-- **Vraie affaire** : de combien une promo est moins chère que la marque maison équivalente. Une remise de −50 % sur un produit de marque qui reste plus cher que la marque maison n'en est pas une.
-- Prix à payer pour la quantité exigée (« 13,98 € les 3 »), prix par unité et au kilo ou au litre, prix habituel. Une offre illisible est affichée telle quelle, sans calcul.
-- Liste d'essentiels modifiable, panier rangé par rayon, promos masquables. Tout reste dans votre navigateur.
-- Badges « À stocker », « Nouveau », « Souvent en promo », « Prix de base en hausse » à partir de l'historique hebdomadaire.
+- **Vraie affaire** : au moins 15 % moins chère que la référence du même magasin (« 28 % moins cher que la référence Carrefour »). Une remise de −50 % sur un produit de marque qui reste plus cher que la marque du magasin n'en est pas une.
+- Prix à payer pour la quantité exigée (« 5,99 € pour 2 unités »), prix par unité et au kilo ou au litre, prix habituel. « Voir le calcul » détaille la réduction, la référence exacte et la portée de la comparaison. Une offre illisible est affichée telle quelle, sans calcul.
+- Mes essentiels (catégories suivies, avec « Tout sélectionner »), « Ma liste » de courses rangée par magasin et par rayon, offres masquables. Tout reste dans votre navigateur.
+- Étiquettes « Bon plan qui se garde », « Nouveau », « Souvent en promo », « Prix habituel en hausse » à partir de l'historique hebdomadaire.
 
 ## Fonctionnement
 Les promos sont relevées chaque semaine sur les sites publics des magasins (`scrape-browser.js`, à coller dans la console du navigateur), puis `build.py` calcule les comparaisons et génère la page :

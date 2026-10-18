@@ -8,7 +8,7 @@ import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
-from promo import parse_offer, basket_total, typeof, form_of, is_dish, match_ref, unit  # noqa: E402
+from promo import parse_offer, basket_total, typeof, form_of, is_dish, match_ref, unit, display_name, fmt_size, pack_noun  # noqa: E402
 
 
 # ---------------------------------------------------------------- offers
@@ -309,3 +309,40 @@ def test_rebuild_does_not_touch_existing_history(tmp_path):
     _fixtures(tmp_path, pulled="2026-10-25T07:00:00Z")
     _build(tmp_path, tmp_path)
     assert "2026-10-25" in json.load(open(tmp_path / "history.json"))  # new week: snapshot added
+
+
+# ---------------------------------------------------------------- display names (presentation only)
+VOC = {"fumé", "extra", "vierge", "tomates", "piment", "lait"}
+
+@pytest.mark.parametrize("raw,strip,title,size", [
+    ("Jambon · Fumé", False, "Jambon fumé", ""),                                  # continuation segment joined
+    ("Huile d'olive · Extra vierge", False, "Huile d'olive extra vierge", ""),
+    ("Chips · Salt · Pepper", False, "Chips · Salt · Pepper", ""),                # unknown words: separators kept
+    ("Chocolat · Lait · Amande", False, "Chocolat · Lait · Amande", ""),          # all or nothing
+    ("Limonade · Citron Citron vert", False, "Limonade · Citron Citron vert", ""),  # repeated word is meaningful here
+    ("Chips · Chips", False, "Chips", ""),                                        # repeated segment
+    ("BUCATINI 500G", True, "Bucatini", "500 g"),                                 # shouted title, size moved out
+    ("VOLUME Conditioner 354 ml", True, "VOLUME Conditioner", "354 ml"),          # one capitalised word is not shouting
+    ("Taleggio Dop 200 g", True, "Taleggio DOP", "200 g"),
+    ("Yaourt à la Grecque Vanille 4X115g", True, "Yaourt à la Grecque Vanille", "4 × 115 g"),
+    ("Spaghetti N°12 500 g", False, "Spaghetti N°12 500 g", ""),                  # size kept when the store gives one
+    ("Bosse à dents · Pro Clean", False, "Bosse à dents · Pro Clean", ""),        # typos are not guessed
+])
+def test_display_name(raw, strip, title, size):
+    assert display_name(raw, VOC, strip_size=strip) == (title, size)
+
+@pytest.mark.parametrize("z,out", [("350 gr", "350 g"), ("14 pc", "14 pièces"), ("1 pc", "1 pièce"), ("1.5 L", "1,5 l"),
+                                   ("6 x 33 cl", "6 × 33 cl"), ("+/- 300 gr", "± 300 g"), ("75 cl", "75 cl"), ("Format XL", "Format XL")])
+def test_fmt_size(z, out):
+    assert fmt_size(z) == out
+
+@pytest.mark.parametrize("name,size,noun", [
+    ("Crodo Orange Soda", "4 × 33 cl", ("pack", "packs")),        # multipack: one unit of the offer is the pack
+    ("Serviettes · Normal", "14 pièces", ("paquet", "paquets")),  # pieces inside one paquet
+    ("Sauce pour pâtes Bocal", "400 g", ("bocal", "bocaux")),
+    ("Cola · Canette", "33 cl", ("canette", "canettes")),
+    ("Burrata", "250 g", None),                                   # nothing in the text: no invented noun
+    ("Potiron", "1 kg", None),                                    # "pot" only as a whole word
+])
+def test_pack_noun(name, size, noun):
+    assert pack_noun(name, size) == noun

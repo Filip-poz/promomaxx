@@ -385,3 +385,74 @@ def match_ref(x, cands, boost=False):
     pool = [h for o, h in scored if o == best]
     pool.sort(key=lambda h: h["v"] * (0.9 if boost and h.get("nb") else 1))
     return pool[0]
+
+# ---------------------------------------------------------------- display names (presentation only, never used for matching)
+# Conservative clean-up: the retailer wording stays available in the details. Nothing is guessed:
+# capitals are only lowered for words the corpus itself writes in lowercase, sizes are only moved, never changed.
+SIZE_END = re.compile(r"\s+((?:\d+\s*[x×]\s*)?\d+(?:[.,]\d+)?\s*(?:kg|gr|g|ml|cl|dl|l)\b\.?)\s*$", re.I)
+ACRO = {"dop": "DOP", "igp": "IGP", "aop": "AOP", "aoc": "AOC", "doc": "DOC", "docg": "DOCG", "xl": "XL", "xxl": "XXL", "bbq": "BBQ", "uht": "UHT"}
+
+def fmt_size(z):
+    """'340G' -> '340 g', '4X115g' -> '4 × 115 g', '350 gr' -> '350 g', '14 pc' -> '14 pièces', '1.5L' -> '1,5 l'."""
+    z = re.sub(r"\s+", " ", (z or "").strip().rstrip("."))
+    if not z: return ""
+    m = re.fullmatch(r"(\+/- ?)?(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*([a-zè]+)", z, re.I)
+    if not m: return z
+    approx, n, v, u = m.groups()
+    u = {"gr": "g", "pc": "pièces", "pcs": "pièces", "st": "pièces"}.get(u.lower(), u.lower())
+    if u == "pièces" and v == "1": u = "pièce"
+    return f"{'± ' if approx else ''}{n + ' × ' if n else ''}{v.replace('.', ',')} {u}"
+
+def name_vocab(names):
+    """Words the retailers themselves write in lowercase somewhere (not as first word), at least twice."""
+    c = {}
+    for n in names:
+        for w in re.findall(r"[^\W\d_][\w'’-]*", n)[1:]:
+            if w.islower(): c[w] = c.get(w, 0) + 1
+    return {w for w, k in c.items() if k >= 2}
+
+def _word(w, lead, vocab, shouting):
+    lw = w.lower()
+    if lw in ACRO: return ACRO[lw]
+    if shouting and len(w) >= 4 and w.isupper() and w.isalpha():   # all-caps title: PENNONI LISCI -> Pennoni lisci
+        return w.capitalize() if lead else lw
+    return w
+
+def display_name(name, vocab=frozenset(), strip_size=False):
+    """-> (title, size_moved_out). A '·' segment whose first word the retailers write in lowercase elsewhere
+    reads as a continuation and is joined ('Jambon · Fumé' -> 'Jambon fumé'); other wording is left as is."""
+    name = re.sub(r"\s+", " ", name or "").strip()
+    size = ""
+    if strip_size:
+        m = SIZE_END.search(name)
+        if m and m.start() > 0:
+            size, name = fmt_size(m.group(1)), name[:m.start()].strip(" ,-·")
+    words = re.findall(r"[^\W\d_]+", name)
+    shouting = sum(w.isupper() and len(w) > 1 for w in words) > len(words) / 2
+    segs = []
+    for s in (p.strip() for p in name.split("·")):
+        if s and (not segs or s.casefold() != segs[-1].casefold()): segs.append(s)   # "Chips · Chips"
+    segs = [[_word(w, i == 0 and j == 0, vocab, shouting) for j, w in enumerate(s.split(" "))] for i, s in enumerate(segs)]
+    cont = lambda w: w.islower() or (w[:1].isupper() and w[1:].islower() and w.lower() in vocab)
+    if len(segs) > 1 and all(cont(ws[0]) for ws in segs[1:]):   # all or nothing, so the title reads one way
+        for ws in segs[1:]: ws[0] = ws[0].lower()
+        t = " ".join(" ".join(ws) for ws in segs)
+    else:
+        t = " · ".join(" ".join(ws) for ws in segs)
+    return (t[:1].upper() + t[1:], size)
+
+# what one "unit" of the offer is, only when the product text says it
+CONTAINER = [("canette", "canettes"), ("bouteille", "bouteilles"), ("bocal", "bocaux"), ("tube", "tubes"), ("sachet", "sachets"),
+             ("boîte", "boîtes"), ("brique", "briques"), ("barquette", "barquettes"), ("flacon", "flacons"), ("pot", "pots")]
+MULTI = re.compile(r"\b\d+\s*[x×]\s*\d+(?:[.,]\d+)?\s*(?:kg|gr|g|ml|cl|l)\b|\bpack\b", re.I)
+PIECES = re.compile(r"\b([2-9]|\d{2,})\s*(?:pc|pcs|pièces?|pieces?|rouleaux|capsules|dosettes|lingettes|doses|lames|x)(?![\w])", re.I)
+
+def pack_noun(name, size=""):
+    """(singular, plural) for one pack of the offer, or None when the text does not say (the page then says 'unité')."""
+    txt = f"{name} {size}"
+    if MULTI.search(txt): return ("pack", "packs")
+    if PIECES.search(txt): return ("paquet", "paquets")
+    low = norm(name)
+    for sg, pl in CONTAINER:
+        if re.search(rf"\b(?:{norm(sg)}|{norm(pl)})\b", low): return (sg, pl)
+    return None

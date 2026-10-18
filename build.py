@@ -1,5 +1,5 @@
 import json, re, sys, os, collections
-from promo import parse_offer, unit, typeof, form_of, is_dish, match_ref, TYPES, FORM_LABEL
+from promo import parse_offer, unit, typeof, form_of, is_dish, match_ref, TYPES, FORM_LABEL, NO_COMPARE, display_name, name_vocab, fmt_size, pack_noun
 
 # python3 build.py [data-dir] [out-dir] [--rewrite-history]
 # history.json only gets a new snapshot for a new scrape date; rebuilding the page never touches it
@@ -99,6 +99,15 @@ for x in items:
     x["v"], x["uu"] = (un if un else (None, ""))
     x["ev"] = round(x["v"] * x["pe"] / x["p"], 3) if un and x["ok"] else None
 
+# display-only title, pack size and pack noun (matching above and below keeps the retailer name in x["n"])
+VOCAB = name_vocab([x["n"] for x in items] + [h["name"] for h in D["house"] + C["house"]])
+for x in items:
+    dn, sz = display_name(x["n"], VOCAB, strip_size=not x["z"])
+    if dn != x["n"]: x["dn"] = dn
+    x["z"] = fmt_size(x["z"]) if x["z"] else sz
+    pk = pack_noun(x["n"], x["z"])
+    if pk: x["pk"] = list(pk)
+
 # house-brand references, per store, typed and formed like the promos
 house = {"d": [], "c": []}
 for s, src in (("d", D["house"]), ("c", C["house"])):
@@ -131,7 +140,7 @@ for x in items:
     if rb and x["ref"]["d"] and rb["n"] != x["ref"]["d"]["n"]: x["refb"] = out_ref(rb)
     # why there is no same-store reference (shown as "Pas de comparaison fiable")
     if not x["ref"][x["s"]]:
-        x["nr"] = ("type" if not x["t"] else "unit" if not x["v"] else "form" if x["f"] is None else "none")
+        x["nr"] = ("type" if not x["t"] else "nocmp" if x["t"] in NO_COMPARE else "unit" if not x["v"] else "form" if x["f"] is None else "none")
     del x["code"], x["dish"]
     if x["f"] is None: x["f"] = ""
     if not x["ref"]["d"] and not x["ref"]["c"]: x["ref"] = {}
@@ -176,7 +185,7 @@ open(f"{OUT}/promo-board.html", "w", encoding="utf-8").write(html)  # claude.ai 
 open(f"{OUT}/index.html", "w", encoding="utf-8").write(  # standalone web page (GitHub Pages)
     '<!doctype html>\n<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
     '<meta name="description" content="Promos de la semaine Delhaize et Carrefour Market comparées aux marques maison.">'
-    '<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏷️</text></svg>">'
+    '<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">'
     '</head><body style="margin:0">\n' + html + '\n</body></html>\n')
 print("items", len(items), "d", sum(x["s"]=="d" for x in items), "c", sum(x["s"]=="c" for x in items))
 print("with img", sum(bool(x["img"]) for x in items), "typed", sum(bool(x["t"]) for x in items))

@@ -1,428 +1,501 @@
-<title>Tableau des promos</title>
+<title>Promomaxx</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: shelf-edge board. Cards (or list rows) framed in the store colour, yellow price tag for the deal, house-brand verdict underneath. Sticky control bar on wide screens. */
+/* Calm shelf: warm neutral page, white cards with neutral borders, one yellow price tag per offer for the store's mechanic.
+   Strong ink only for prices, verdicts and the add button. Store = small labelled badge, never a coloured frame. */
 :root{
-  --bg:#f3f4f2; --surface:#ffffff; --ink:#15171b; --muted:#5d6470; --line:#dfe2e0;
-  --tag:#ffd43b; --tag-ink:#1b1a12; --good:#1f7a4d; --good-bg:#e3f3ea; --warn:#9a5b00; --warn-bg:#fdf0d8;
-  --new:#5b3fb8; --new-bg:#ece7fb;
-  --dlh:#c8102e; --dlh-bg:#fbe7e9; --car:#1f4fa3; --car-bg:#e5ecf9; --thumb:#ffffff;
+  --bg:#f5f4f0; --surface:#ffffff; --sunk:#eeece6; --ink:#1c1d20; --muted:#585d66; --line:#e2dfd8; --line2:#cdc9bf;
+  --accent:#1c1d20; --accent-ink:#ffffff;
+  --tag:#ffd84d; --tag-ink:#25210b; --good:#17693f; --good-bg:#e2f1e7; --warn:#8a4f00; --warn-bg:#fbeed6;
+  --new:#5a3fb5; --new-bg:#eeeafb; --dlh:#c8102e; --car:#1f4fa3; --thumb:#ffffff; --focus:#2f5fd0;
+  --r:12px; --r-sm:8px; --img:112px;
   --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
   --f-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111316; --surface:#1a1d22; --ink:#eceef1; --muted:#9aa2ad; --line:#2b3038;
-  --tag:#f5c518; --tag-ink:#17150b; --good:#5fd39a; --good-bg:#16352a; --warn:#f2b45a; --warn-bg:#3a2a12;
-  --new:#b9a5ff; --new-bg:#2a2245;
-  --dlh:#ff5a6a; --dlh-bg:#3a1a1e; --car:#6f9cff; --car-bg:#1a2645; --thumb:#f4f4f2; color-scheme:dark}}
+  --bg:#121315; --surface:#1b1d20; --sunk:#232529; --ink:#eceef1; --muted:#a3a9b3; --line:#2d3036; --line2:#3d4149;
+  --accent:#eceef1; --accent-ink:#121315;
+  --tag:#f5c518; --tag-ink:#17150b; --good:#6ad3a0; --good-bg:#163527; --warn:#f2b45a; --warn-bg:#3a2a12;
+  --new:#bfaeff; --new-bg:#2a2245; --dlh:#ff6b78; --car:#7ba4ff; --thumb:#f4f4f1; --focus:#8fb0ff; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111316; --surface:#1a1d22; --ink:#eceef1; --muted:#9aa2ad; --line:#2b3038;
-  --tag:#f5c518; --tag-ink:#17150b; --good:#5fd39a; --good-bg:#16352a; --warn:#f2b45a; --warn-bg:#3a2a12;
-  --new:#b9a5ff; --new-bg:#2a2245;
-  --dlh:#ff5a6a; --dlh-bg:#3a1a1e; --car:#6f9cff; --car-bg:#1a2645; --thumb:#f4f4f2; color-scheme:dark}
+  --bg:#121315; --surface:#1b1d20; --sunk:#232529; --ink:#eceef1; --muted:#a3a9b3; --line:#2d3036; --line2:#3d4149;
+  --accent:#eceef1; --accent-ink:#121315;
+  --tag:#f5c518; --tag-ink:#17150b; --good:#6ad3a0; --good-bg:#163527; --warn:#f2b45a; --warn-bg:#3a2a12;
+  --new:#bfaeff; --new-bg:#2a2245; --dlh:#ff6b78; --car:#7ba4ff; --thumb:#f4f4f1; --focus:#8fb0ff; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+body:has(dialog[open]){overflow:hidden}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
-.stale{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--warn-bg);color:var(--warn);font-weight:600;font-size:14px}
-.guides{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:flex-start}
-.how{font-size:14px}
-.how[open]{flex-basis:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 14px 14px}
-.how summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:8px;font:600 14px var(--f-body);color:var(--ink);background:var(--car-bg);border:1px solid var(--car);border-radius:999px;padding:7px 14px 7px 8px;margin-top:0}
-.how summary::-webkit-details-marker{display:none}
-.how summary:hover{background:color-mix(in srgb,var(--car) 18%,var(--surface))}
-.how[open] summary{background:none;border-color:transparent;padding-left:0;margin-top:6px}
-.how .gi{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--car);color:#fff;font:800 13px var(--f-body);flex:none}
-.lingo .gi{background:var(--tag);font-size:12px}
-.lingo summary{background:color-mix(in srgb,var(--tag) 18%,var(--surface));border-color:var(--tag)}
-.lingo summary:hover{background:color-mix(in srgb,var(--tag) 30%,var(--surface))}
-.how ol{margin:8px 0 0;padding-left:20px;display:grid;gap:6px;color:var(--muted);max-width:80ch}
-.how ol b{color:var(--ink)}
-.ii{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--car);color:#fff !important;font:700 11px var(--f-body);vertical-align:1px}
-.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-top:10px}
-.lcard{position:relative;display:flex;flex-direction:column;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px 34px}
-.lcard b{font:700 13px var(--f-mono);background:var(--tag);color:var(--tag-ink);padding:3px 8px 3px 12px;clip-path:polygon(8px 0,100% 0,100% 100%,8px 100%,0 50%);align-self:flex-start}
-.lcard span{font-size:13px;color:var(--muted);line-height:1.35}
-.lcard em{position:absolute;left:12px;bottom:9px;font:700 13px var(--f-mono);font-style:normal;color:var(--good)}
-.lcard em::before{content:"Remise réelle ";font-weight:500;color:var(--muted)}
-.lingo h4{font-family:var(--f-display);font-size:16px;margin:16px 0 4px}
-.lingo ul{margin:0;padding-left:20px;display:grid;gap:6px;color:var(--muted);max-width:80ch}
-.lingo ul b{color:var(--ink)}
-header h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,5vw,40px);letter-spacing:-.02em;margin:0;text-wrap:balance}
-.weeks{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px;color:var(--muted);font-size:13px}
-.weeks b{color:var(--ink);font-weight:600}
-.ring{display:inline-block;width:12px;height:12px;border-radius:50%;border:3px solid;margin-right:6px;vertical-align:-1px;flex:none}
-.ring.d{border-color:var(--dlh)} .ring.c{border-color:var(--car)}
-.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:18px}
-.sum{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-align:left;font:inherit;color:inherit}
-button.sum{cursor:pointer} button.sum:hover{border-color:var(--ink)}
-.sum .k{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.sum .v{font-family:var(--f-display);font-weight:800;font-size:24px;margin-top:2px;font-variant-numeric:tabular-nums}
-.sum .s{font-size:13px;color:var(--muted)}
-.sum .go{font-size:12.5px;font-weight:600;color:var(--car);margin-top:4px}
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px;margin-top:18px;border-bottom:1px solid var(--line)}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tab{font:600 14px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
-.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.tab .n{font-family:var(--f-mono);font-size:12px;opacity:.75;margin-left:4px}
-.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
-.controls input[type=search]{flex:1 1 220px;min-width:0;font:15px var(--f-body);padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
-.seg button{font:600 13px var(--f-body);border:0;background:none;color:var(--muted);padding:8px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;line-height:1.2;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mut{color:var(--muted)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;font-weight:600;font-size:14px;padding:8px 14px;border-radius:var(--r-sm);border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;line-height:1.2;text-align:center}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.15)}
+.btn.ghost{border-color:transparent;background:none;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px;padding-inline:4px}
+.btn.ghost:hover{text-decoration-color:currentColor}
+.btn.sm{min-height:34px;font-size:13.5px;padding:6px 11px}
+.btn.in{background:var(--good-bg);border-color:transparent;color:var(--good)}
+.btn.quiet{color:var(--muted)}
+.linkbtn{font-weight:600;font-size:inherit;background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line2);cursor:pointer;padding:2px 0}
+.linkbtn:hover{text-decoration-color:currentColor}
+
+/* header */
+.top{display:grid;gap:8px;max-width:72ch}
+.brand{display:flex;align-items:center;gap:8px;font:700 13px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.top h1{font-weight:800;font-size:clamp(30px,4.6vw,44px);letter-spacing:-.02em}
+.lede{font-size:17px;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:14px;color:var(--muted);margin-top:2px}
+.meta b{color:var(--ink);font-weight:600}
+.stale{padding:10px 12px;border-radius:var(--r-sm);background:var(--warn-bg);color:var(--warn);font-weight:600;font-size:14px}
+
+/* sticky bar: tabs, search, store, filters */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;margin-top:22px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.tab{position:relative;font-weight:600;font-size:15px;border:0;background:none;color:var(--muted);padding:8px 12px 11px;cursor:pointer}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--ink)}
+.tab .n{display:inline-block;min-width:20px;font-size:12px;font-weight:700;background:var(--ink);color:var(--bg);border-radius:999px;padding:1px 6px;margin-left:6px;text-align:center}
+.tab .n:empty{display:none}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.search{position:relative;flex:1 1 280px;min-width:0}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--muted);pointer-events:none}
+.search input{width:100%;font-size:15px;padding:10px 40px 10px 38px;border:1px solid var(--line2);border-radius:var(--r-sm);background:var(--surface);color:var(--ink)}
+.search input::-webkit-search-cancel-button{display:none}
+.search .clr{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:6px;background:none;color:var(--muted);cursor:pointer;font-size:15px}
+.search .clr:hover{background:var(--sunk);color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:var(--r-sm);overflow:hidden;background:var(--surface)}
+.seg button{font-weight:600;font-size:14px;border:0;background:none;color:var(--muted);padding:9px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.pills{display:flex;flex-wrap:wrap;gap:6px;padding-block:8px 2px;align-items:center}
-.pills .sep{flex:none;width:1px;height:20px;background:var(--line);margin:0 2px}
-.prow{display:contents}
-@media (max-width:640px){
-  .pills{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
-  .pills .sep,.pill .lb.opt{display:none}
-  .prow{display:flex;gap:6px}
-  .prow.sels>.pill{flex:1 1 auto;min-width:0;justify-content:center}
-  .pill .v{min-width:0;overflow:hidden;text-overflow:ellipsis}
-  .pills .pill{font-size:12.5px;padding-inline:9px}
-  .pills .pill.sel,.pills .pill.dd{padding-right:22px}
-  .pill.sel::after,.pill.dd::after{right:9px}
-  .pills .pill .v.d{display:none} .pills .pill .v.m{display:inline}
-  .prow.flts{flex-wrap:wrap}
-  .prow.flts>.pill{flex:1 0 auto}
-}
-.pill.sel{position:relative;display:inline-flex;align-items:center;gap:4px;padding-right:26px}
-.pill.sel select{position:absolute;inset:0;opacity:0;cursor:pointer;font:inherit;width:100%}
-.pill .lb{color:var(--muted)}
-.pill .v.m{display:none}
-.pill[aria-pressed="true"] .lb{color:inherit;opacity:.7}
-.pill.sel::after,.pill.dd::after{content:"";position:absolute;right:11px;top:50%;width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-70%) rotate(45deg);opacity:.7}
-.pill.dd{position:relative;padding-right:26px;display:inline-flex;align-items:center;gap:4px}
-.pill.dd[aria-expanded="true"]::after{transform:translateY(-20%) rotate(-135deg)}
-.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,40%),1fr));gap:6px;margin-top:8px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
-.chips[hidden]{display:none}
-.chips .chip{display:flex;align-items:center;gap:6px;text-align:left;border-radius:8px;padding:7px 9px;white-space:normal;line-height:1.2}
-.chips .chip .em{font-size:17px;flex:none}
-.chips .chip .n{margin-left:auto}
-.pill,.chip{flex:none;min-height:32px;font:500 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:5px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
-.pill[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chip[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-.pill .n,.chip .n{font-family:var(--f-mono);font-size:11px;margin-left:4px;opacity:.7}
-button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--car);outline-offset:2px}
-
-/* list view */
-.list{display:flex;flex-direction:column;gap:6px;margin-top:12px}
-.row{display:grid;grid-template-columns:58px minmax(0,1fr) auto auto;gap:4px 12px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:8px 11px 8px 8px}
-.row.d,.card.d{border-color:var(--dlh)} .row.c,.card.c{border-color:var(--car)}
-.ph{grid-row:1 / span 2;width:58px;height:58px;border-radius:10px;background:var(--thumb);display:grid;place-items:center;overflow:hidden;font-size:26px;text-decoration:none;color:inherit}
-.ph img{width:52px;height:52px;object-fit:contain;display:block}
-.name{min-width:0}
-.name .t{font-weight:600;overflow-wrap:anywhere}
-.name .t a{color:inherit;text-decoration:none} .name .t a:hover{text-decoration:underline}
-.name .b{font-size:12.5px;color:var(--muted)}
-.mark{display:inline-block;font:600 10.5px var(--f-body);letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px;color:var(--muted);background:var(--bg);border:1px solid var(--line)}
-.deal{display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}
-.tag{font:700 12.5px var(--f-mono);background:var(--tag);color:var(--tag-ink);padding:3px 8px 3px 12px;clip-path:polygon(8px 0,100% 0,100% 100%,8px 100%,0 50%);white-space:nowrap;align-self:flex-start}
-.deal .tag{align-self:auto}
-.eff{font:500 12px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
-.eff b{color:var(--good)}
-.price{text-align:right;font-variant-numeric:tabular-nums}
-.price .p{font:700 15px var(--f-mono);display:block}
-.price .u{font:500 11.5px var(--f-mono);color:var(--muted)}
-.add{grid-column:4;grid-row:1;display:flex;gap:4px;justify-content:flex-end}
-.addbtn,.hidebtn{font:700 18px var(--f-mono);width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;line-height:1;display:grid;place-items:center;padding:0}
-.hidebtn{font-size:14px;color:var(--muted)}
-.addbtn[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--surface)}
-.row .deal{grid-column:3;grid-row:1}
-.row .price{grid-column:4;grid-row:2}
-.hbline{grid-column:2 / span 3;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12.5px}
-.verdict{font-weight:600;border-radius:5px;padding:1px 7px}
-.verdict.good{color:var(--good);background:var(--good-bg)} .verdict.warn{color:var(--warn);background:var(--warn-bg)}
-.hbref{color:var(--muted);display:inline-flex;align-items:center;gap:5px;min-width:0}
-.hbref .ring{width:10px;height:10px;border-width:2px;margin:0}
-.hbref b{font-family:var(--f-mono);font-weight:700;color:var(--ink)}
-.hbref a{color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted)} .hbref a:hover{color:var(--ink)}
-@media (max-width:640px){
-  .row{grid-template-columns:52px minmax(0,1fr) auto}
-  .ph{width:52px;height:52px}.ph img{width:46px;height:46px}
-  .row .deal{grid-column:2 / span 2;grid-row:2;flex-direction:row;justify-content:flex-start;flex-wrap:wrap;align-items:center;text-align:left}
-  .row .price{grid-column:2;grid-row:3;text-align:left;display:flex;gap:8px;align-items:baseline}
-  .row .price .p{display:inline}
-  .add{grid-column:3;grid-row:1}
-  .hbline{grid-column:1 / span 3;grid-row:4}
-}
-
-/* card view */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;margin-top:12px}
-.card{position:relative;display:flex;flex-direction:column;background:var(--surface);border:2px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
-.cph{display:grid;place-items:center;background:var(--thumb);height:132px;font-size:46px;text-decoration:none;color:inherit}
-.cph img{width:116px;height:116px;object-fit:contain;display:block}
-.card .tools{position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:5px}
-.card .tools button{box-shadow:0 1px 3px rgba(0,0,0,.18)}
-.card .tools .hidebtn{background:var(--surface)}
-/* + and ✕ only on hover (always shown on touch screens); an item already in the basket keeps its ✓ */
-@media (hover:hover){
-  .card .tools button,.row .add button{opacity:0;transition:opacity .12s}
-  .card:hover .tools button,.card:focus-within .tools button,.row:hover .add button,.row:focus-within .add button,
-  .card .tools .addbtn[aria-pressed="true"],.row .add .addbtn[aria-pressed="true"],.hid .hidebtn{opacity:1}
-}
-.card .badges{position:absolute;top:8px;left:8px;right:48px;display:flex;flex-wrap:wrap;gap:4px}
-.cbody{padding:9px 10px 10px;display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
-.cn{font-weight:600;font-size:14px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:inherit;text-decoration:none;overflow-wrap:anywhere}
-.cn:hover{text-decoration:underline}
-.cb{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cdeal{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
-.cprice{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:2px}
-.cprice .p{font:700 16px var(--f-mono)}
-.cprice .u{font:500 11px var(--f-mono);color:var(--muted)}
-.cvd{font-size:12px;line-height:1.35}
-.cvd .verdict{display:inline-block;padding:1px 6px;margin-bottom:2px}
-.cref{font-size:11.5px;color:var(--muted);margin-top:3px}
-.cref .nw{white-space:nowrap}
-.cref .ibtn{margin-left:4px;width:16px;height:16px;font-size:11px}
-.cref .ring{width:9px;height:9px;border-width:2px;margin-right:4px;vertical-align:0}
-.cref b{font-family:var(--f-mono);color:var(--ink)}
-@media (max-width:640px){
-  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .cph{height:116px}.cph img{width:100px;height:100px}
-  .cbody{padding:8px}
-}
-details.topd{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px}
-details.topd>summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:12px 18px 12px 0;position:relative;font-family:var(--f-display);font-weight:600;font-size:17px}
-details.topd>summary::-webkit-details-marker{display:none}
-details.topd>summary::after{content:"";position:absolute;right:4px;top:19px;width:7px;height:7px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(45deg)}
-details.topd[open]>summary::after{transform:rotate(-135deg);top:23px}
-details.topd .grid,details.topd .list{margin:0 0 12px}
-
-.bdg{font:700 10.5px var(--f-body);letter-spacing:.02em;border-radius:4px;padding:2px 6px;white-space:nowrap;display:inline-block}
-.bdg.soon{color:var(--warn);background:var(--warn-bg)} .bdg.new{color:var(--new);background:var(--new-bg)}
-.bdg.stock{color:var(--good);background:var(--good-bg)} .bdg.muted{color:var(--muted);background:var(--bg);border:1px solid var(--line)}
-.name .bdg{margin-left:6px;vertical-align:1px}
-.card.hid,.row.hid{opacity:.55}
-
-.group{margin-top:24px}
-.group h3{font-family:var(--f-display);font-weight:600;font-size:19px;margin:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.group h3 .hint,.hint{font:500 12.5px var(--f-body);color:var(--muted)}
-.ghb{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px;font-size:13px;color:var(--muted)}
-.ghb .hbref b{font-size:13px}
-.winner{font:600 12px var(--f-body);padding:2px 8px;border-radius:999px;display:inline-flex;align-items:center}
-.winner.d{background:var(--dlh-bg);color:var(--dlh)} .winner.c{background:var(--car-bg);color:var(--car)}
-.nbt{display:inline-flex;align-items:center;gap:8px;font:600 13px var(--f-body);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer;user-select:none;position:relative}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}
+.dot.d{background:var(--dlh)} .dot.c{background:var(--car)}
+.fbtn{min-height:40px}
+.fbtn .n{font-size:12px;font-weight:700;background:var(--ink);color:var(--bg);border-radius:999px;padding:1px 7px}
+.fbtn[aria-expanded="true"]{border-color:var(--ink)}
+.fpanel{margin-top:10px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:grid;gap:14px}
+.fpanel[hidden]{display:none}
+.bar:has(.fpanel:not([hidden])){position:static}
+.fsec h3{font:700 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.fsel{font-size:14px;padding:8px 10px;border:1px solid var(--line2);border-radius:var(--r-sm);background:var(--surface);color:var(--ink);min-width:200px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:34px;font-size:13.5px;font-weight:500;border:1px solid var(--line2);background:var(--surface);color:var(--ink);padding:5px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .n{font-size:12px;opacity:.7}
+.prefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;padding-top:12px;border-top:1px solid var(--line)}
+.nbt{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;cursor:pointer;user-select:none;position:relative}
 .nbt input{position:absolute;opacity:0;width:1px;height:1px}
-.nbt .sw{width:30px;height:18px;border-radius:999px;background:var(--line);position:relative;flex:none}
-.nbt .sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.nbt .sw{width:34px;height:20px;border-radius:999px;background:var(--line2);position:relative;flex:none}
+.nbt .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .nbt input:checked + .sw{background:var(--good)}
-.nbt input:checked + .sw::after{left:14px}
-.nbt input:focus-visible + .sw{outline:2px solid var(--car);outline-offset:2px}
-@media (prefers-reduced-motion:no-preference){.nbt .sw,.nbt .sw::after{transition:all .15s}.addbtn{transition:background .15s,color .15s}}
-.nbtag{font:700 10.5px var(--f-mono);color:var(--good);background:var(--good-bg);border-radius:4px;padding:1px 5px}
-.ns{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:4px;font:800 11px var(--f-body);color:#fff;margin-left:6px;vertical-align:1px}
-.ns.A{background:#038141}.ns.B{background:#85bb2f}.ns.C{background:#d8a400}.ns.D{background:#ee8100}.ns.E{background:#e63e11}
-.more{font:600 13px var(--f-body);background:none;border:0;color:var(--car);cursor:pointer;padding:8px 2px}
-.empty{color:var(--muted);padding:28px 4px;text-align:center}
-.stapbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:16px;font-size:13.5px;color:var(--muted)}
-.linkbtn{font:600 13.5px var(--f-body);background:none;border:0;color:var(--car);cursor:pointer;padding:4px 0}
+.nbt input:checked + .sw::after{left:16px}
+.nbt input:focus-visible + .sw{outline:2px solid var(--focus);outline-offset:2px}
+.nbhelp{font-size:13px;color:var(--muted);margin-top:6px;max-width:60ch}
+@media (prefers-reduced-motion:no-preference){.nbt .sw,.nbt .sw::after{transition:all .15s}}
+.activef{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:10px;align-items:center;font-size:13.5px;color:var(--muted)}
+.activef:empty{display:none}
+.activef .chip{min-height:30px;padding:3px 10px;font-size:13px;background:var(--sunk);border-color:transparent}
+.activef .chip::after{content:"✕";font-size:11px;opacity:.6}
+.activef .chip:hover{border-color:var(--ink)}
+
+/* section heads */
+.shead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px;margin:24px 0 14px}
+.shead h2{font-size:24px}
+.shead .sub{color:var(--muted);font-size:14.5px;margin-top:3px}
+.results{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;margin:20px 0 12px;font-size:15px}
+.results b{font-weight:700}
+.intro{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:var(--surface);border:1px dashed var(--line2);border-radius:var(--r);padding:10px 14px;font-size:14.5px;margin-bottom:14px}
+
+/* offer: one component, laid out as a card (.grid) or a row (.list) */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,236px),1fr));gap:16px}
+.list{display:flex;flex-direction:column;gap:8px}
+.offer{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0}
+.offer.hid{opacity:.6}
+.grid .offer{display:flex;flex-direction:column;padding:0 14px 14px}
+.o-media{position:relative;margin:0 -14px 12px;border-bottom:1px solid var(--line)}
+.o-img{display:grid;place-items:center;height:calc(var(--img) + 30px);background:var(--thumb);border-radius:var(--r) var(--r) 0 0;text-decoration:none;font-size:46px;overflow:hidden}
+.o-img img{width:var(--img);height:var(--img);object-fit:contain;display:block}
+.store{position:absolute;left:10px;bottom:8px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#26282c;background:rgba(255,255,255,.94);border:1px solid #e2dfd8;border-radius:999px;padding:2px 9px 2px 7px}
+.flags{position:absolute;top:8px;left:8px;right:8px;display:flex;flex-wrap:wrap;gap:4px}
+.bdg{font-size:11.5px;font-weight:700;border-radius:5px;padding:2px 7px;white-space:nowrap;display:inline-block;line-height:1.35}
+.bdg.new{color:var(--new);background:var(--new-bg)} .bdg.stock{color:var(--good);background:var(--good-bg)}
+.bdg.up{color:var(--warn);background:var(--warn-bg)} .bdg.muted{color:var(--muted);background:var(--sunk)}
+.o-name{font:600 15px/1.3 var(--f-body);overflow-wrap:anywhere}
+.o-name a{text-decoration:none}
+.o-name a:hover{text-decoration:underline}
+.grid .o-name{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.o-meta{font-size:13.5px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}
+.ns{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:4px;font:800 11px var(--f-body);color:#fff;margin-left:4px;vertical-align:1px}
+.ns.A{background:#038141}.ns.B{background:#5d9a1f}.ns.C{background:#b88c00}.ns.D{background:#d97300}.ns.E{background:#d9360c}
+.o-price{margin-top:10px}
+.o-tot{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+.o-tot b{font-family:var(--f-display);font-weight:800;font-size:24px;letter-spacing:-.01em;line-height:1.1}
+.o-tot span{font-size:14px;font-weight:600}
+.o-unit{font-size:13.5px;margin-top:2px}
+.o-mech{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:6px;font-size:13px;color:var(--muted)}
+.tag{font-size:12.5px;font-weight:700;background:var(--tag);color:var(--tag-ink);border-radius:5px;padding:1px 7px;white-space:normal;line-height:1.4}
+.o-warn{color:var(--warn);font-weight:600}
+.o-vd{font-size:13.5px;font-weight:600;line-height:1.35;margin-top:10px;padding:5px 9px;border-radius:var(--r-sm)}
+.o-vd.good{color:var(--good);background:var(--good-bg)}
+.o-vd.warn{color:var(--warn);background:var(--warn-bg)}
+.o-vd.same{color:var(--ink);background:var(--sunk)}
+.o-vd.none{color:var(--muted);background:none;padding-inline:0;font-weight:500}
+.o-why{font-size:13px;color:var(--muted);margin-top:6px}
+.o-end{font-size:12.5px;color:var(--muted);margin-top:8px}
+.o-end.soon{color:var(--warn);font-weight:600}
+.o-act{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:auto;padding-top:12px}
+.o-act [data-add],.o-act [data-hide]{flex:1 1 auto}
+.grid .o-end+.o-act,.grid .o-vd+.o-act,.grid .o-why+.o-act{padding-top:10px}
+
+.list .offer{display:grid;grid-template-columns:76px minmax(0,1fr) minmax(170px,210px) 176px;grid-template-areas:"img main price act" "img vd price act" "img end price act";gap:2px 16px;align-items:start;padding:10px 12px}
+.list .o-media{grid-area:img;margin:0;border:0}
+.list .o-img{width:76px;height:76px;border-radius:var(--r-sm);font-size:30px;border:1px solid var(--line)}
+.list .o-img img{width:66px;height:66px}
+.list .store{position:static;margin-top:6px;font-size:11.5px;padding:1px 7px 1px 6px;background:none;border-color:var(--line);color:var(--ink)}
+.list .flags{position:static;margin-top:4px}
+.list .bdg{white-space:normal}
+.list .o-main{grid-area:main}
+.list .o-price{grid-area:price;margin-top:0;text-align:right}
+.list .o-tot,.list .o-mech{justify-content:flex-end}
+.list .o-tot b{font-size:20px}
+.list .o-vd{grid-area:vd;justify-self:start;margin-top:6px}
+.list .o-why{grid-area:end}
+.list .o-end{grid-area:end;margin-top:4px}
+.list .o-why+.o-end{display:none}
+.list .o-act{grid-area:act;flex-direction:column;align-items:stretch;padding-top:0}
+.list .o-act .btn{width:100%}
+
+@media (max-width:820px){
+  .list .offer{grid-template-columns:64px minmax(0,1fr) auto;grid-template-areas:"img main price" "img vd vd" "img end end" "act act act"}
+  .list .o-img{width:64px;height:64px}.list .o-img img{width:56px;height:56px}
+  .list .o-act{flex-direction:row;padding-top:10px}
+  .list .o-act .btn{width:auto}
+}
+@media (max-width:560px){
+  /* phones: one column, photo on the left, same reading order */
+  .grid{grid-template-columns:minmax(0,1fr);gap:10px}
+  .grid .offer{display:grid;grid-template-columns:96px minmax(0,1fr);grid-template-areas:"img main" "img price" "vd vd" "why why" "end end" "act act";column-gap:12px;padding:12px}
+  .grid .o-media{grid-area:img;margin:0;border:0;align-self:start}
+  .grid .o-img{height:96px;border-radius:var(--r-sm);border:1px solid var(--line);font-size:34px}
+  .grid .o-img img{width:84px;height:84px}
+  .grid .store,.list .store{position:static;margin-top:6px;font-size:11.5px;padding:1px 7px 1px 6px;background:none;border-color:var(--line);color:var(--ink)}
+  .grid .flags{position:static;margin-top:4px}
+  .grid .bdg{white-space:normal}
+  .grid .o-main{grid-area:main}
+  .grid .o-price{grid-area:price;margin-top:6px}
+  .grid .o-vd{grid-area:vd}
+  .grid .o-why{grid-area:why}
+  .grid .o-end{grid-area:end}
+  .grid .o-act{grid-area:act;flex-wrap:nowrap}
+  .grid .o-act [data-why]{flex:none}
+  .grid .o-name{-webkit-line-clamp:4}
+  .o-tot b{font-size:21px}
+  .o-vd{font-size:13px;padding:4px 8px}
+  .list .offer{grid-template-columns:56px minmax(0,1fr);grid-template-areas:"img main" "img price" "vd vd" "end end" "act act";gap:2px 12px}
+  .list .o-price{text-align:left;margin-top:4px}
+  .list .o-tot,.list .o-mech{justify-content:flex-start}
+  .list .o-img{width:56px;height:56px}.list .o-img img{width:48px;height:48px}
+  .list .o-act{flex-wrap:nowrap}
+  .list .o-act [data-why]{flex:none}
+}
+
+/* essentials */
+.featured{background:var(--sunk);border-radius:calc(var(--r) + 4px);padding:16px;margin-top:4px}
+.featured .shead{margin-top:0}
+.fams{display:grid;gap:8px}
+details.fam{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+details.fam>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:12px 44px 12px 14px;position:relative}
+details.fam>summary::-webkit-details-marker{display:none}
+details.fam>summary::after{content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;border:solid var(--muted);border-width:0 2px 2px 0;transform:translateY(-70%) rotate(45deg)}
+details.fam[open]>summary::after{transform:translateY(-20%) rotate(-135deg)}
+details.fam>summary:hover{background:color-mix(in srgb,var(--sunk) 60%,transparent);border-radius:var(--r)}
+.fname{font:600 16.5px var(--f-display)}
+.fname .em{margin-right:6px}
+.fcount{font-size:13.5px;color:var(--muted)}
+.st{font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 9px}
+.st.good{color:var(--good);background:var(--good-bg)}
+.st.plain{color:var(--muted);background:var(--sunk);font-weight:600}
+.st.na{color:var(--muted);border:1px dashed var(--line2);font-weight:600}
+.fbody{padding:0 14px 14px}
+.more{margin-top:12px}
+.quiet-list{font-size:14px;color:var(--muted);margin-top:14px;line-height:1.7}
+.quiet-list b{color:var(--ink);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);margin:-6px 0 12px}
+.empty{text-align:center;padding:44px 16px;display:grid;justify-items:center;gap:10px}
+.empty h2{font-size:22px}
+.empty p{color:var(--muted);max-width:52ch}
+.empty .acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px}
+.empty .em{font-size:40px}
+
+/* dialogs: side panel on desktop, bottom sheet on phones */
+dialog{border:0;padding:0;background:var(--surface);color:var(--ink);max-width:none;max-height:none}
+dialog[open]{display:flex;flex-direction:column}
+dialog::backdrop{background:rgba(18,19,21,.42)}
+dialog.side{position:fixed;inset:0 0 0 auto;margin:0;width:min(460px,100vw);height:100dvh;border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(0,0,0,.12)}
+dialog.center{margin:auto;width:min(780px,calc(100vw - 32px));max-height:min(86dvh,900px);border-radius:16px;border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.d-head{display:flex;gap:12px;align-items:flex-start;padding:16px 16px 12px 20px;border-bottom:1px solid var(--line)}
+.d-head h2{font-size:20px;flex:1;min-width:0;overflow-wrap:anywhere}
+.d-head .sub{font-size:14px;color:var(--muted);margin-top:3px;font-family:var(--f-body);font-weight:400}
+.d-x{flex:none;width:38px;height:38px;border-radius:var(--r-sm);border:1px solid var(--line2);background:var(--surface);cursor:pointer;font-size:16px;color:var(--ink)}
+.d-x:hover{border-color:var(--ink)}
+.d-body{flex:1;overflow:auto;padding:16px 20px 20px;overscroll-behavior:contain}
+.d-foot{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface)}
+.d-foot .grow{margin-right:auto}
+.d-sec+.d-sec{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.d-sec h3{font-size:16.5px;margin-bottom:10px}
+.d-sec p+p,.d-sec p+ul,.d-sec ul+p{margin-top:8px}
+.d-sec ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.d-sec li{color:var(--muted)} .d-sec li b{color:var(--ink)}
+.calc{display:grid;gap:0;margin:0}
+.calc>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.calc>div:last-child{border-bottom:0}
+.calc dt{color:var(--muted);font-size:14px}
+.calc dd{margin:0;text-align:right;font-size:14.5px}
+.calc dd b{font-size:16px}
+.calc .tot dd b{font-family:var(--f-display);font-weight:800;font-size:20px}
+.dprod{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+.dprod .o-img{width:72px;height:72px;border-radius:var(--r-sm);border:1px solid var(--line);font-size:28px;flex:none}
+.dprod .o-img img{width:62px;height:62px}
+.dprod .store{position:static;margin-top:4px}
+.ref{background:var(--sunk);border-radius:var(--r-sm);padding:10px 12px;margin-top:10px;font-size:14px}
+.ref a{font-weight:600}
+.scope{font-size:13.5px;color:var(--muted);margin-top:10px}
+.nbtag{font-size:11.5px;font-weight:700;color:var(--good);background:var(--good-bg);border-radius:4px;padding:1px 5px;margin-left:4px}
+@media (max-width:640px){
+  dialog.side,dialog.center{inset:auto 0 0 0;margin:0;width:100%;height:auto;max-height:90dvh;border-radius:16px 16px 0 0;border:0;border-top:1px solid var(--line)}
+  dialog.center.full{height:100dvh;max-height:100dvh;border-radius:0}
+  .d-body{padding:14px 16px 18px}
+  .d-head{padding:14px 12px 10px 16px}
+}
 
 /* essentials editor */
-.editor{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.edhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
-.edhead h3{font-family:var(--f-display);font-weight:600;font-size:19px;margin:0}
-.edhead .actions{margin:0 0 0 auto}
-.editor fieldset{border:0;padding:0;margin:14px 0 0}
-.editor legend{font:600 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0;margin-bottom:6px}
-.fams{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
-.fam{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:14px;background:var(--bg)}
-.fam:has(input:checked){border-color:var(--good);background:var(--good-bg)}
-.fam input{accent-color:var(--good);width:16px;height:16px;margin:0}
-.fam .n{margin-left:auto;font:500 11px var(--f-mono);color:var(--muted)}
+.ed-bulk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+.ed-count{font-weight:700;margin-right:auto;font-size:15px}
+.ed-note{font-size:13px;color:var(--muted);flex-basis:100%}
+.ed-body fieldset{border:0;padding:0;margin:0 0 16px}
+.ed-body legend{font:700 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0;margin-bottom:8px}
+.ed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.edf{display:flex;align-items:center;gap:10px;min-height:42px;padding:7px 10px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;font-size:14.5px;background:var(--surface)}
+.edf:hover{border-color:var(--line2)}
+.edf:has(input:checked){border-color:var(--good);background:var(--good-bg)}
+.edf input{accent-color:var(--good);width:18px;height:18px;margin:0;flex:none}
+.edf .n{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+@media (max-width:640px){.ed-bulk{padding:10px 16px}.ed-grid{grid-template-columns:1fr 1fr}.edf{font-size:13.5px}}
+@media (max-width:380px){.ed-grid{grid-template-columns:1fr}}
 
-/* basket */
-.basket-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px}
-.aisle{font:600 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
-.brow{display:grid;grid-template-columns:auto 52px minmax(0,1fr) auto;gap:4px 12px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:8px 11px 8px 10px;margin-top:6px}
-.brow.d{border-color:var(--dlh)} .brow.c{border-color:var(--car)}
-.brow .ph{grid-row:auto;width:52px;height:52px}.brow .ph img{width:46px;height:46px}
-.brow .chk{display:grid;place-items:center;width:28px;height:28px;cursor:pointer}
-.brow .chk input{width:22px;height:22px;accent-color:var(--good);margin:0;cursor:pointer}
-.brow .r{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.brow.done{opacity:.5}.brow.done .name .t{text-decoration:line-through}
-.qty{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--f-mono)}
-.qty button{width:28px;height:28px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.btn{font:600 14px var(--f-body);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
-.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.note{margin-top:14px;font-size:13.5px;color:var(--muted)}
-footer{margin-top:36px;font-size:12.5px;color:var(--muted);max-width:76ch}
-footer p{margin:6px 0}
+/* help */
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:4px}
+.lcard{display:flex;flex-direction:column;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
+.lcard .tag{align-self:flex-start}
+.lcard span{font-size:13.5px;color:var(--muted);line-height:1.4}
+.lcard em{font-style:normal;font-weight:700;font-size:13.5px;color:var(--good);margin-top:auto}
+.three{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.three li{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;color:var(--ink)}
+.three li span{display:block;font-size:13.5px;color:var(--muted);margin-top:2px}
+
+/* ma liste */
+.lsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.sum{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.sum .k{font-size:13px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sum .v{font-family:var(--f-display);font-weight:800;font-size:26px;margin-top:2px}
+.sum .s{font-size:13.5px;color:var(--muted)}
+.sum.total{border-color:var(--ink)}
+.lstore{margin-top:24px}
+.lstore h3{font-size:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lstore h3 .mut{font:500 14px var(--f-body)}
+.aisle{font:700 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.li{display:grid;grid-template-columns:auto 56px minmax(0,1fr) auto;gap:4px 14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-top:6px}
+.li .o-img{width:56px;height:56px;border-radius:var(--r-sm);font-size:26px;border:1px solid var(--line)}
+.li .o-img img{width:48px;height:48px}
+.li .chk{display:grid;place-items:center;width:32px;height:32px;cursor:pointer}
+.li .chk input{width:22px;height:22px;accent-color:var(--good);margin:0;cursor:pointer}
+.li.done{opacity:.55}.li.done .o-name{text-decoration:line-through}
+.li-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right}
+.li-pay b{font-family:var(--f-display);font-weight:800;font-size:18px}
+.li-pay span{display:block;font-size:12.5px;color:var(--muted)}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:var(--r-sm);overflow:hidden}
+.qty button{width:36px;height:34px;border:0;background:var(--surface);color:var(--ink);cursor:pointer;font-size:17px;font-weight:600}
+.qty button:hover{background:var(--sunk)}
+.qty output{min-width:80px;text-align:center;font-size:13.5px;font-weight:600;padding:0 6px;border-inline:1px solid var(--line)}
+.qnote{font-size:13px;margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.qnote.warn{color:var(--warn)} .qnote.ok{color:var(--good)}
+.lacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
 @media (max-width:640px){
-  .bar{position:static}
-  .brow{grid-template-columns:auto 46px minmax(0,1fr)}
-  .brow .ph{width:46px;height:46px}.brow .ph img{width:40px;height:40px}
-  .brow .r{grid-column:3;flex-direction:row;justify-content:space-between;align-items:center}
+  .lsum{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .sum{padding:10px 12px}
+  .sum.total{grid-column:1 / -1}
+  .sum .v{font-size:22px}
+  .li{grid-template-columns:auto 48px minmax(0,1fr)}
+  .li .o-img{width:48px;height:48px}.li .o-img img{width:40px;height:40px}
+  .li-side{grid-column:2 / span 2;flex-direction:row;justify-content:space-between;align-items:center;width:100%}
 }
 
-/* price block: what you pay, for how many, per unit, regular price, condition */
-.pblk{display:flex;flex-direction:column;gap:1px;font-variant-numeric:tabular-nums;min-width:0}
-.ptot{font:700 16px var(--f-mono);line-height:1.25}
-.ptot .pq{font:600 12.5px var(--f-body);color:var(--muted)}
-.psub{font:500 11.5px var(--f-mono);color:var(--ink);overflow-wrap:anywhere}
-.preg{font-size:11.5px;color:var(--muted)}
-.pcond{font:600 12px var(--f-body);color:var(--tag-ink);background:color-mix(in srgb,var(--tag) 35%,transparent);border-radius:4px;padding:1px 6px;margin-top:3px;align-self:flex-start}
-.pcond.warn{color:var(--warn);background:var(--warn-bg);font-weight:500}
-.row .price .pblk{align-items:flex-end;text-align:right}
-.st{font:600 11px var(--f-body);letter-spacing:.02em}
-.st.d{color:var(--dlh)} .st.c{color:var(--car)}
-.verdict.none{color:var(--muted);background:var(--bg);border:1px solid var(--line);font-weight:500}
-.verdict.same{color:var(--ink);background:var(--bg);border:1px solid var(--line)}
-.ibtn{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:0;background:var(--car);color:#fff;font:700 12px/1 var(--f-body);font-style:normal;cursor:pointer;padding:0;margin-left:6px;vertical-align:1px;flex:none}
-.ibtn:hover{filter:brightness(1.12)}
-.ibtn[aria-expanded="true"]{background:var(--ink);color:var(--bg)}
-.whyp{display:none;font-size:12px;color:var(--muted);margin:6px 0 0;padding:6px 8px 6px 22px;gap:3px;background:var(--bg);border-radius:8px}
-.whyopen .whyp{display:grid}
-.whyp b{color:var(--ink);font-weight:600}
-.whyp a{color:inherit}
-.hbline .whyp{flex-basis:100%}
-.hbline .ibtn{margin-left:-4px}
-.reason{font:600 12px var(--f-body);color:var(--good);background:var(--good-bg);border-radius:6px;padding:3px 7px;line-height:1.3}
+/* toast */
+.toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;display:flex;gap:14px;align-items:center;background:var(--ink);color:var(--bg);border-radius:10px;padding:11px 14px 11px 16px;font-size:14.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100vw - 32px)}
+.toast[hidden]{display:none}
+.toast .linkbtn{color:var(--bg);text-decoration-color:currentColor;white-space:nowrap}
 
-/* compact header stats */
-.stats{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:13.5px;color:var(--muted);align-items:baseline}
-.stats .linkbtn{font-size:13.5px;padding:0}
-.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
-.how{margin-top:0}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted);display:grid;gap:6px;max-width:80ch}
 
-/* filters panel */
-.fbtn{position:relative;font:600 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 28px 8px 12px;border-radius:8px;cursor:pointer}
-.fbtn::after{content:"";position:absolute;right:11px;top:50%;width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-70%) rotate(45deg);opacity:.7}
-.fbtn[aria-expanded="true"]::after{transform:translateY(-20%) rotate(-135deg)}
-.fbtn .n{font:700 11px var(--f-mono);background:var(--ink);color:var(--bg);border-radius:999px;padding:1px 6px;margin-left:6px}
-.fpanel{margin-top:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
-.fpanel[hidden]{display:none}
-.fpanel .prefs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
-.activef{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;font-size:12.5px;color:var(--muted)}
-.activef:empty{display:none}
-.activef .chip{min-height:28px;padding:3px 10px;font-size:12.5px}
-.activef .chip::after{content:" ✕";opacity:.6}
-.empty-s{color:var(--muted);padding:6px 0 14px;margin:0}
-.sm{display:none}
-.card .cdeal .tag{white-space:normal;max-width:100%;line-height:1.3}
-
-/* basket quantity conditions */
-.qwarn{font-size:12px;color:var(--warn);background:var(--warn-bg);border-radius:6px;padding:3px 8px;margin-top:4px;display:inline-block}
-.qwarn .linkbtn{font-size:12px;padding:0;margin-left:4px}
-.qok{font-size:12px;color:var(--good)}
 @media (max-width:640px){
-  .stats{font-size:13px;gap:2px 12px}
-  header h1{font-size:26px}
-  .weeks{font-size:12px;gap:2px 12px;margin-top:4px}
-  .controls input[type=search]{flex-basis:100%}
-  .ptot{font-size:15px}
-  .lg,.r2{display:none} .sm{display:inline}
-  .tabs{flex-wrap:nowrap}
-  .tab{padding:7px 12px;font-size:13.5px}
-  .controls{gap:6px}
-  .seg button{padding:8px 8px;font-size:12.5px}
-  .fbtn{padding:8px 26px 8px 10px;margin-left:auto}
-  details.topd>summary{font-size:16px}
-  details.topd>summary .hint{font-size:12px}
+  .bar{position:static;margin-top:16px}
+  .lede{font-size:15.5px}
+  .tab{font-size:14.5px;padding:8px 10px 10px}
+  .seg button{padding:9px 10px;font-size:13.5px}
+  .controls .seg{flex:1 1 auto}
+  .controls .seg button{flex:1;justify-content:center}
+  .shead h2{font-size:21px}
+  .featured{padding:12px;margin-inline:-4px}
+  .only-wide{display:none}
 }
+@media (min-width:641px){.only-narrow{display:none}}
 </style>
 
 <div class="wrap">
-  <header>
-    <h1>Tableau des promos</h1>
-    <div class="weeks" id="weeks"></div>
+  <header class="top">
+    <p class="brand"><span aria-hidden="true">🛒</span>Promomaxx</p>
+    <h1>Les promos qui valent le détour.</h1>
+    <p class="lede">Delhaize et Carrefour Market, comparés au vrai prix au kilo. Repérez les bonnes affaires, puis préparez votre liste.</p>
+    <p class="meta"><span id="updated"></span><span id="sync"></span><button class="linkbtn" data-help="1" aria-haspopup="dialog">Comment ça marche ?</button></p>
     <p class="stale" id="stale" hidden></p>
-    <div class="stats" id="summary" aria-label="La semaine en un coup d'œil"></div>
-    <div class="guides">
-    <details class="how" id="how">
-      <summary><span class="gi" aria-hidden="true">?</span>Comment ça marche</summary>
-      <ol>
-        <li><b>Chaque semaine</b>, les promos Delhaize et le folder Carrefour Market sont relevés sur les sites des magasins. Les offres expirées disparaissent toutes seules.</li>
-        <li><b>Prix affiché :</b> ce que vous payez pour la quantité exigée par l'offre (« 13,98 € les 3 »), le prix par unité et au kilo ou au litre qui en découle, et le prix habituel.</li>
-        <li><b>Vraie affaire :</b> la promo coûte au moins 15 % de moins, au kilo, au litre ou à la pièce, que la marque maison la moins chère du même format dans le même magasin. Sans référence fiable, la page affiche « Pas de comparaison fiable » et ne met pas la promo en avant.</li>
-        <li><b>Mes essentiels</b> part d'une liste de courses type. Touchez « Modifier mes essentiels » pour cocher vos produits, ou « Tout effacer » pour partir de zéro.</li>
-        <li><b>+</b> (au survol d'une promo) ajoute au panier la quantité exigée par l'offre : une liste de courses rangée par rayon, à cocher en magasin ou à copier. <b>✕</b> masque une promo qui ne vous intéresse pas. Le <b class="ii">i</b> à côté de la marque maison détaille le calcul.</li>
-        <li><b>Nutri-Boost</b> (carte SuperPlus Delhaize) : réglage dans « Filtres et tri ». Laissez-le activé si vous l'avez.</li>
-      </ol>
-    </details>
-    <details class="how lingo" id="lingo">
-      <summary><span class="gi" aria-hidden="true">🏷️</span>Décoder le jargon des promos</summary>
-      <div class="lgrid">
-        <div class="lcard"><b>−25 %</b><span>Vous payez 75 % du prix, dès le premier paquet.</span><em>−25 %</em></div>
-        <div class="lcard"><b>1+1 gratuit</b><span>2 pour le prix d'1. Imbattable, mais il faut en prendre 2.</span><em>−50 %</em></div>
-        <div class="lcard"><b>2+1 gratuit</b><span>3 pour le prix de 2.</span><em>−33 %</em></div>
-        <div class="lcard"><b>3+1 gratuit</b><span>4 pour le prix de 3. Même remise que « −25 % », mais avec 4 paquets sous le bras.</span><em>−25 %</em></div>
-        <div class="lcard"><b>2e à −50 %</b><span>La remise ne porte que sur le 2e. Sur les deux, elle est deux fois plus petite que le chiffre affiché.</span><em>−25 %</em></div>
-        <div class="lcard"><b>3e à −60 %</b><span>Même principe, répartie sur 3 paquets.</span><em>−20 %</em></div>
-        <div class="lcard"><b>3 pour 5 €</b><span>Comparez à 3 fois le prix habituel. Le prix rond donne l'impression d'une affaire, sans garantie.</span><em>selon le prix</em></div>
-      </div>
-      <h4>Pourquoi « 2e à −50 % » plutôt que « −25 % » ?</h4>
-      <ul>
-        <li><b>Le gros chiffre attire l'œil.</b> « −50 % » sonne deux fois mieux que « −25 % », pour la même remise.</li>
-        <li><b>Vous repartez avec plus.</b> Le multi-achat fait sortir 2 ou 3 paquets au lieu d'un. Ce qui dort dans votre placard, vous ne l'achèterez pas chez le concurrent la semaine suivante.</li>
-        <li><b>La marque paie souvent.</b> Les offres en volume sont en grande partie financées par les fabricants, qui achètent ainsi du volume et de la place en rayon.</li>
-        <li><b>La remise simple, pour ce qui ne se stocke pas.</b> Personne n'achète 4 salades ou 3 poulets frais : pour le frais, et pour les prix d'appel du folder qui font venir en magasin, le « −25 % » reste roi.</li>
-        <li><b>Le bon réflexe :</b> regarder le prix au kilo ou au litre et l'écart avec la marque maison. La page fait le calcul pour vous.</li>
-      </ul>
-    </details>
-    </div>
   </header>
 
   <div class="bar" id="bar">
-    <div class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-view="staples"><span class="lg">Mes e</span><span class="sm">E</span>ssentiels<span class="n" id="n-staples"></span></button>
-      <button class="tab" role="tab" aria-selected="false" data-view="all">Toutes<span class="lg"> les promos</span><span class="n" id="n-all"></span></button>
-      <button class="tab" role="tab" aria-selected="false" data-view="basket">Panier<span class="n" id="n-basket"></span></button>
+    <div class="tabs" role="tablist" aria-label="Vues">
+      <button class="tab" role="tab" id="tab-staples" aria-selected="true" aria-controls="view" data-view="staples">Mes essentiels</button>
+      <button class="tab" role="tab" id="tab-all" aria-selected="false" aria-controls="view" data-view="all"><span class="only-wide">Toutes les promos</span><span class="only-narrow">Toutes</span></button>
+      <button class="tab" role="tab" id="tab-basket" aria-selected="false" aria-controls="view" data-view="basket">Ma liste<span class="n" id="n-basket"></span></button>
     </div>
     <div id="filters">
       <div class="controls">
-        <input type="search" id="q" placeholder="Chercher kéfir, Côte d'Or, lave-vaisselle…" aria-label="Chercher une promo">
+        <div class="search">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6"/><path d="m13 13 5 5" stroke-linecap="round"/></svg>
+          <input type="search" id="q" placeholder="Kéfir, Côte d'Or, lave-vaisselle…" aria-label="Chercher une offre" autocomplete="off">
+          <button class="clr" id="qclr" aria-label="Effacer la recherche" hidden>✕</button>
+        </div>
         <div class="seg" role="group" aria-label="Magasin">
           <button data-store="all" aria-pressed="true">Les deux</button>
-          <button data-store="d" aria-pressed="false"><span class="ring d"></span>Delhaize</button>
-          <button data-store="c" aria-pressed="false"><span class="ring c"></span>Carrefour</button>
+          <button data-store="d" aria-pressed="false"><span class="dot d" aria-hidden="true"></span>Delhaize</button>
+          <button data-store="c" aria-pressed="false"><span class="dot c" aria-hidden="true"></span>Carrefour</button>
         </div>
-        <button class="fbtn" id="fbtn" data-fopen="1" aria-expanded="false" aria-controls="fpanel">Filtres<span class="lg"> et tri</span><span class="n" id="fcount" hidden></span></button>
+        <button class="btn fbtn" id="fbtn" data-fopen="1" aria-expanded="false" aria-controls="fpanel">Filtres et affichage<span class="n" id="fcount" hidden></span></button>
       </div>
+      <div class="fpanel" id="fpanel" hidden></div>
       <div class="activef" id="activef" aria-label="Filtres actifs"></div>
-      <div class="fpanel" id="fpanel" hidden>
-        <div class="pills" id="pills" aria-label="Trier et filtrer"></div>
-        <div class="chips" id="chips" role="group" aria-label="Rayons" hidden></div>
-        <div class="prefs">
-          <label class="nbt" for="nb"><input type="checkbox" id="nb" role="switch"><span class="sw" aria-hidden="true"></span>Nutri-Boost 10 %</label>
-          <div class="seg" role="group" aria-label="Affichage">
-            <button data-mode="cards" aria-pressed="true" title="Cartes">▦ Cartes</button>
-            <button data-mode="list" aria-pressed="false" title="Liste">☰ Liste</button>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <main id="view"></main>
+  <main id="view" tabindex="-1"></main>
 
   <footer>
-    <p><b>Trois chiffres distincts :</b> la <b>remise</b> (dans le détail du calcul) compare le prix de l'offre au prix habituel du même produit, pour la même quantité. L'écart avec la <b>marque maison</b> (« 20 % sous la marque maison ») compare le prix au kilo, au litre ou à la pièce à la référence maison la moins chère du même format, dans le même magasin. Dans « Les meilleures affaires », à format égal, la promo au <b>prix unitaire le plus bas</b> passe en premier.</p>
-    <p><b>Calcul :</b> on paie la quantité exigée par l'offre. 1+1 = 2 pour le prix d'1 (−50 %), 2+1 = −33 %, 2e à −50 % = −25 %, 3e à −60 % = −20 %, « 3 pour 5 € » et « −6,99 € à l'achat de 3 » comparés à 3 fois le prix habituel. Quand l'offre peut porter sur un mélange de produits, le calcul suppose plusieurs exemplaires du même produit. Une offre illisible est affichée telle quelle, sans calcul.</p>
-    <p><b>Marque maison :</b> le produit Delhaize ou Carrefour (Carrefour, Classic, Simpl, No Brand…) le moins cher de la même famille, du même format (capsules ou moulu, liquide ou tablettes, sirop ou boisson, riz sec ou cuit…) et de la même unité, à son prix habituel. Les plats préparés ne servent jamais de référence pour un ingrédient. Une marque maison en promo n'est comparée qu'à une autre marque maison. En cas de doute : « Pas de comparaison fiable ».</p>
-    <p><b>Nutri-Boost :</b> −10 % chez Delhaize sur les produits Nutri-Score A et B à prix normal. D'après nos tickets de caisse, il ne se cumule pas avec une promo. Le bouton applique donc les −10 % aux produits de marque maison Delhaize notés A ou B.</p>
-    <p><b>Badges :</b> « À stocker » = produit qui se garde, au moins −33 % et au moins 15 % sous la marque maison. « Nouveau », « Souvent en promo » (3 semaines sur les 4 dernières, le prix normal est alors théorique) et « Prix de base en hausse » se basent sur l'historique des relevés précédents.</p>
-    <p>✕ masque une promo jusqu'à la fin de l'offre. <span id="savenote">Vos essentiels, votre panier et les promos masquées sont enregistrés pour vous seul et synchronisés entre vos appareils quand la page est ouverte sur claude.ai.</span></p>
+    <p><b>Les grandes étiquettes ne font pas toujours les petites additions.</b> On compare le prix au kilo, au litre ou à la pièce, pas le pourcentage affiché. <button class="linkbtn" data-help="1" aria-haspopup="dialog">Méthode, sources et limites</button></p>
     <p id="src"></p>
+    <p id="savenote">Vos essentiels, votre liste et les offres masquées sont enregistrés pour vous seul et synchronisés entre vos appareils quand la page est ouverte sur claude.ai.</p>
   </footer>
 </div>
 
+<dialog id="dlg" class="side" aria-labelledby="dlg-t"></dialog>
+<dialog id="ed" class="center full" aria-labelledby="ed-t"></dialog>
+<dialog id="help" class="center" aria-labelledby="help-t">
+  <div class="d-head"><h2 id="help-t">Comment ça marche<span class="sub" style="display:block">Le calcul, sans prise de tête.</span></h2><button class="d-x" data-close="1" aria-label="Fermer">✕</button></div>
+  <div class="d-body">
+    <section class="d-sec">
+      <h3>En bref</h3>
+      <ul>
+        <li><b>Chaque semaine</b>, on relève les promos Delhaize et le folder Carrefour Market sur les sites des magasins. Les offres expirées disparaissent toutes seules.</li>
+        <li><b>Le prix affiché</b> est ce que vous payez pour la quantité exigée par l'offre (« 5,99 € pour 2 »), avec le prix par unité et au kilo ou au litre.</li>
+        <li><b>Mes essentiels</b> rassemble les catégories que vous suivez. En tête, les meilleures affaires : une par catégorie.</li>
+        <li><b>Ajouter à ma liste</b> ajoute la quantité exigée par l'offre. Votre liste se range par magasin et par rayon, pour cocher en magasin.</li>
+      </ul>
+    </section>
+    <section class="d-sec">
+      <h3>Trois chiffres à ne pas confondre</h3>
+      <ul class="three">
+        <li><b>La réduction</b><span>Le prix de l'offre comparé au prix habituel du même produit, pour la même quantité. Visible dans « Voir le calcul ».</span></li>
+        <li><b>La comparaison avec la marque du magasin</b><span>« 28 % moins cher que la référence Carrefour » : le prix au kilo, au litre ou à la pièce comparé au produit de marque Carrefour le moins cher du même format, chez Carrefour. Ce n'est pas une comparaison entre magasins.</span></li>
+        <li><b>Le prix le plus bas parmi des offres comparables</b><span>Seulement dans « Les meilleures affaires », et toujours avec sa portée : par exemple « Prix au kilo le plus bas parmi 3 vraies affaires comparables » (même catégorie, même format, même unité).</span></li>
+      </ul>
+    </section>
+    <section class="d-sec">
+      <h3>Le jargon des promos, décodé</h3>
+      <div class="lgrid">
+        <div class="lcard"><span class="tag">−25 %</span><span>Vous payez 75 % du prix, dès le premier paquet.</span><em>Réduction réelle : 25 %</em></div>
+        <div class="lcard"><span class="tag">1+1 gratuit</span><span>2 pour le prix d'1. Belle remise, mais il faut en prendre 2.</span><em>Réduction réelle : 50 %</em></div>
+        <div class="lcard"><span class="tag">2+1 gratuit</span><span>3 pour le prix de 2.</span><em>Réduction réelle : 33 %</em></div>
+        <div class="lcard"><span class="tag">3+1 gratuit</span><span>4 pour le prix de 3. La même chose que « −25 % », avec 4 paquets sous le bras.</span><em>Réduction réelle : 25 %</em></div>
+        <div class="lcard"><span class="tag">2e à −50 %</span><span>La remise ne porte que sur le 2e. Sur les deux, elle est deux fois plus petite que le chiffre affiché.</span><em>Réduction réelle : 25 %</em></div>
+        <div class="lcard"><span class="tag">3e à −60 %</span><span>Même principe, réparti sur 3 paquets.</span><em>Réduction réelle : 20 %</em></div>
+        <div class="lcard"><span class="tag">3 pour 5 €</span><span>À comparer à 3 fois le prix habituel. Le prix rond fait bonne impression, sans garantie.</span><em>Selon le prix habituel</em></div>
+      </div>
+      <p style="margin-top:14px"><b>Pourquoi « 2e à −50 % » plutôt que « −25 % » ?</b></p>
+      <ul>
+        <li><b>Le gros chiffre attire l'œil.</b> « −50 % » sonne deux fois mieux que « −25 %», pour la même remise.</li>
+        <li><b>Vous repartez avec plus.</b> Ce qui dort dans votre placard, vous ne l'achèterez pas chez le concurrent la semaine suivante.</li>
+        <li><b>La marque paie souvent.</b> Les offres en volume sont en grande partie financées par les fabricants, qui achètent ainsi du volume et de la place en rayon.</li>
+        <li><b>La remise simple, pour ce qui ne se garde pas.</b> Personne n'achète 4 salades : pour le frais et les prix d'appel du folder, le « −25 % » reste roi.</li>
+      </ul>
+    </section>
+    <section class="d-sec">
+      <h3>Comment on choisit la référence</h3>
+      <ul>
+        <li><b>Même magasin :</b> le produit de marque Delhaize ou Carrefour (Carrefour, Classic, Simpl, No Brand…) le moins cher de la même catégorie, à son prix habituel.</li>
+        <li><b>Même format et même unité :</b> capsules ou moulu, liquide ou tablettes, sirop ou boisson, riz sec ou cuit, bio ou non… Les plats préparés ne servent jamais de référence pour un ingrédient.</li>
+        <li><b>Une marque du magasin en promo</b> n'est comparée qu'à une autre marque du magasin, jamais à elle-même.</li>
+        <li><b>Vraie affaire :</b> au moins 15 % moins cher que sa référence. En cas de doute, on affiche « Comparaison indisponible ». Ce n'est pas un mauvais signe : on n'a simplement pas trouvé de produit assez proche pour comparer honnêtement.</li>
+        <li><b>Plusieurs produits dans une offre :</b> le calcul suppose plusieurs exemplaires du même produit. Une offre illisible est affichée telle quelle, sans calcul.</li>
+      </ul>
+    </section>
+    <section class="d-sec">
+      <h3>Nutri-Boost</h3>
+      <p class="mut">Avec Nutri-Boost sur la carte SuperPlus, Delhaize retire 10 % sur les produits Nutri-Score A et B à prix normal. D'après nos tickets de caisse, la remise ne se cumule pas avec une promo. Si vous l'activez dans « Filtres et affichage », seules les références Delhaize notées A ou B passent à −10 % : les prix des promos ne changent pas.</p>
+    </section>
+    <section class="d-sec">
+      <h3>Les petites étiquettes</h3>
+      <ul>
+        <li><b>Nouveau :</b> pas en promo la semaine dernière.</li>
+        <li><b>Souvent en promo :</b> en promo 3 semaines sur les 4 dernières. Le prix habituel est alors un peu théorique.</li>
+        <li><b>Prix habituel en hausse :</b> le prix normal a augmenté de plus de 3 % depuis un relevé précédent.</li>
+        <li><b>Bon plan qui se garde :</b> produit qui se conserve longtemps, au moins 33 % de réduction et au moins 15 % moins cher que sa référence.</li>
+      </ul>
+    </section>
+    <section class="d-sec">
+      <h3>Sources, limites et vos données</h3>
+      <p class="mut" id="help-src"></p>
+      <p class="mut">Les prix en ligne peuvent différer légèrement du magasin. Les coupons personnels (app SuperPlus, Carrefour Bonus) ne sont pas publics et ne sont pas pris en compte. Produits bébé exclus.</p>
+      <p class="mut" id="help-save"></p>
+    </section>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
 <script>
 const DATA = __DATA__;
-const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
 const CATS = DATA.cats, TYPES = DATA.types, STOCK = new Set(DATA.stock||[]), TCAT = DATA.tcat||{};
-const STORE = {d:"Delhaize", c:"Carrefour"};
+const STORE = {d:"Delhaize", c:"Carrefour"}, STORE_L = {d:"Delhaize", c:"Carrefour Market"};
 const UNIT = {kg:"kg", l:"l", pc:"pièce", dose:"dose", m:"m"};
 const CAT_ORDER = Object.keys(CATS);
+const NB = " ";
 
-const eur = n => n.toFixed(2).replace(".",",")+" €";
+const eur = n => n.toFixed(2).replace(".",",")+NB+"€";
 const num = n => (n<1?n.toFixed(3).replace(/(\.\d\d\d*?)0+$/,"$1"):n.toFixed(2)).replace(".",",");
-const pct = d => Math.round(d*100)+" %";
+const pct = d => Math.round(d*100)+NB+"%";
+const int = n => n.toLocaleString("fr-BE");
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const plural = (n, one, many) => `${int(n)}${NB}${n>1?many:one}`;
 
 // dates: "dd/mm" ends, relative to the scrape date
 const PULLED = DATA.pulled ? new Date(DATA.pulled) : new Date();
@@ -440,23 +513,29 @@ function dateOf(s){
 const ITEMS = DATA.items.map(x=>{
   const end = dateOf(x.e);
   // one model everywhere: buy q packs at regular price p, pay tot (only when the offer was read reliably)
-  return Object.assign(x,{id:x.k, save: x.ok ? x.q*x.p - x.tot : 0, pay: x.ok ? x.tot : x.p, hay:norm(x.n+" "+x.b),
+  return Object.assign(x,{id:x.k, save: x.ok ? x.q*x.p - x.tot : 0, pay: x.ok ? x.tot : x.p, hay:norm(x.n+" "+(x.dn||"")+" "+x.b),
     end, left: end ? Math.round((end-TODAY)/864e5) : null, gone: end ? end < TODAY : false});
 });
 const BY_ID = Object.fromEntries(ITEMS.map(x=>[x.id,x]));
+const nameOf = x => x.dn || x.n;
+// one "unit" of the offer: the product text's own noun when it has one (pot, pack, paquet...), else "unité"
+const nounOf = (x, n) => x.pk ? x.pk[n>1?1:0] : (n>1?"unités":"unité");
+const qtyTxt = (x, n) => `${n}${NB}${nounOf(x,n)}`;
 
 // ---- per-person state: browser storage now, synced through the artifact db when available ----
+// Storage keys and field names (basket, hidden, checked, staples, nb) are unchanged so saved state survives the redesign.
 const LS = "promo-state-v2";
-let P = {staples:null, basket:{}, hidden:{}, checked:{}, nb:true};
+let P = {staples:null, basket:{}, hidden:{}, checked:{}, nb:true}, SAVED = false;
 try {
   const j = JSON.parse(localStorage.getItem(LS)||"null");
-  if (j) Object.assign(P, j);
-  else { const nb = localStorage.getItem("promo-nutriboost"); if (nb!==null) P.nb = nb==="1"; }
+  if (j){ Object.assign(P, j); SAVED = true; }
+  else { const nb = localStorage.getItem("promo-nutriboost"); if (nb!==null){ P.nb = nb==="1"; SAVED = true; } }
 } catch(e){}
+if (!SAVED) P.nb = false;   // new visitor: Nutri-Boost is a card benefit, never assumed
 function tidy(){
   for (const k of ["basket","hidden","checked"]) { if (!P[k] || typeof P[k]!=="object") P[k]={}; for (const id of Object.keys(P[k])) if (!BY_ID[id]) delete P[k][id]; }
   for (const id of Object.keys(P.checked)) if (!P.basket[id]) delete P.checked[id];
-  if (Array.isArray(P.staples)) P.staples = P.staples.filter(k=>TYPES[k]); else P.staples = null;
+  if (Array.isArray(P.staples)) P.staples = P.staples.filter(k=>TYPES[k]); else P.staples = null;   // [] = explicitly empty, kept
   P.nb = P.nb !== false;
   // basket v1 counted offer bundles (1 = "1+1", i.e. 2 packs); v2 counts packs. Same physical quantity, converted once.
   if (P.bv !== 2){ for (const id of Object.keys(P.basket)) P.basket[id] = Math.max(1, Math.round(P.basket[id])) * (BY_ID[id].q || 1); P.bv = 2; }
@@ -504,7 +583,7 @@ function setSync(s){ const el=document.getElementById("sync"); if (el) el.textCo
 })();
 
 const ST = () => P.staples || DATA.staples;
-let state = {view:"staples", store:"all", cats:[], q:"", sort:"beat", min:0, f:{}, open:{}, edit:false, topOpen:true, fopen:false};
+let state = {view:"staples", store:"all", cats:[], q:"", sort:"beat", min:0, f:{}, open:{}, fopen:false};
 
 // ---- house-brand verdict ----
 // Three separate ideas: x.d = discount vs the product's own regular price; x.beat = advantage vs a valid same-store
@@ -525,100 +604,112 @@ const isDeal = x => x.beat!=null && x.beat >= .15;
 const vis0 = x => !x.gone && !P.hidden[x.id];
 const perPhrase = (u, t) => ({kg:"au kilo", l:"au litre", pc:"à la pièce", m:"au mètre"})[u] || (u==="dose" ? (t==="lessive"||t==="vaisselle" ? "par lavage" : "par dose") : "unitaire");
 const uLbl = (u, t) => u==="dose" ? (t==="lessive"||t==="vaisselle" ? "lavage" : "dose") : (UNIT[u]||u);
-
-function refChip(r, s, short){
-  const boosted = P.nb && r.nb;
-  return `<span class="hbref" title="${esc(r.n)}"><span class="ring ${s}"></span>${short?`<span>Marque maison</span>`:`<a href="${esc(r.l)}" target="_blank" rel="noopener">${esc(r.n)}</a>`} <b>${num(rv(r))} €/${uLbl(r.u)}</b>${boosted?'<span class="nbtag">NB</span>':""}</span>`;
-}
-function verdictTxt(x){
-  if (x.vd==="warn") return `<span class="verdict warn">Marque maison ${pct(x.gap)} moins chère</span>`;
-  if (x.vd==="good") return `<span class="verdict good">${pct(x.beat)} sous la marque maison</span>`;
-  if (x.vd==="same") return `<span class="verdict same">Au prix de la marque maison</span>`;
-  return `<span class="verdict none">Pas de comparaison fiable</span>`;
-}
-// what you pay, for how many packs, per unit, and the regular price
-function priceHTML(x){
-  const per = (v, u) => v!=null && u ? `${num(v)} €/${uLbl(u, x.t)}` : "";
-  if (!x.ok) return `<div class="pblk"><div class="ptot">${eur(x.p)}</div><div class="preg">Prix habituel${x.v?` · ${per(x.v,x.uu)}`:""}</div><div class="pcond warn">Offre non interprétée : voir le magasin</div></div>`;
-  if (x.q>1) return `<div class="pblk"><div class="ptot">${eur(x.tot)} <span class="pq">les ${x.q}</span></div>
-    <div class="psub">${eur(x.pe)} / unité${x.ev?` · ${per(x.ev,x.uu)}`:""}</div>
-    <div class="preg">Prix habituel : ${eur(x.p)} / unité</div></div>`;
-  return `<div class="pblk"><div class="ptot">${eur(x.tot)}</div>${x.ev?`<div class="psub">${per(x.ev,x.uu)}</div>`:""}<div class="preg">Prix habituel : ${eur(x.p)}</div></div>`;
-}
-const NR = {type:"famille de produit non reconnue", unit:"le magasin ne donne pas de prix au kilo, au litre ou à la pièce",
-  form:"format non identifié (par exemple capsules ou moulu, liquide ou tablettes) : pas de référence", none:"aucune marque maison du même format et de la même unité dans ce magasin"};
-function detailsHTML(x){
-  const li = [], o = x.s==="d"?"c":"d", same = refOf(x, x.s), other = refOf(x, o);
-  const per = (v,u) => `${num(v)} €/${uLbl(u, x.t)}`;
-  li.push(`Offre en magasin : « ${esc(x.raw)} »${x.tier?`. Palier suivant : ${esc(x.tier)}`:""}`);
-  if (x.ok){
-    li.push(x.q>1 ? `${x.q} × ${eur(x.p)} = ${eur(x.q*x.p)} au prix habituel, <b>${eur(x.tot)}</b> avec l'offre : remise de ${pct(x.d)}.` : `${eur(x.p)} au prix habituel, <b>${eur(x.tot)}</b> avec l'offre : remise de ${pct(x.d)}.`);
-    if (x.mix) li.push(`Calcul pour ${x.q} exemplaires de ce produit. Si l'offre accepte un mélange, le total dépend des produits choisis.`);
-    if (x.ev) li.push(`Prix habituel ${per(x.v,x.uu)}, avec l'offre <b>${per(x.ev,x.uu)}</b>.`);
-  } else li.push(`Pas de calcul : ${esc(x.why||"conditions non reconnues")}.`);
-  if (x.fl) li.push(`Format comparé : ${esc(x.fl)}.`);
-  if (same) li.push(`Référence maison ${STORE[x.s]} : <a href="${esc(same.l)}" target="_blank" rel="noopener">${esc(same.n)}</a>, ${eur(same.p)}, <b>${per(rv(same),same.u)}</b> au prix habituel${P.nb&&same.nb?", Nutri-Boost −10 % inclus":""}.`);
-  else li.push(`Pas de comparaison fiable : ${x.ok ? NR[x.nr]||NR.none : "offre non interprétée"}.`);
-  if (other) li.push(`Chez ${STORE[o]} (pour info) : <a href="${esc(other.l)}" target="_blank" rel="noopener">${esc(other.n)}</a>, ${per(rv(other),other.u)}.`);
-  if (x.hb) li.push(`Produit de marque maison : sa remise porte sur son propre prix. Il n'est comparé qu'à une autre marque maison du même format.`);
-  return `<ul class="whyp">${li.map(l=>`<li>${l}</li>`).join("")}</ul>`;
-}
-const infoBtn = x => `<button class="ibtn" data-why="1" aria-expanded="false" aria-label="Détails du calcul : ${esc(x.n)}" title="Détails du calcul">i</button>`;
-function hbLine(x){
-  const same = refOf(x, x.s), other = refOf(x, x.s==="d"?"c":"d");
-  const parts = [verdictTxt(x)];
-  if (same) parts.push(refChip(same, x.s) + infoBtn(x)); else parts.push(infoBtn(x));
-  if (other) parts.push(refChip(other, x.s==="d"?"c":"d"));
-  return `<div class="hbline">${parts.join("")}${detailsHTML(x)}</div>`;
-}
-function badges(x){
-  const b = [];
-  if (x.gone) b.push(["muted","Terminée"]);
-  else if (x.left===0) b.push(["soon","Dernier jour"]);
-  else if (x.left===1) b.push(["soon","Finit demain"]);
-  if (x.nw) b.push(["new","Nouveau"]);
-  if (x.stock) b.push(["stock","À stocker"]);
-  if (x.up) b.push(["soon","Prix de base en hausse"]);
-  if (x.hx) b.push(["muted","Souvent en promo"]);
-  return b.map(([c,t])=>`<span class="bdg ${c}">${t}</span>`).join("");
-}
+const per = (v, u, t) => `${num(v)}${NB}€/${uLbl(u, t)}`;
+const famLabel = x => x.t && TYPES[x.t] ? TYPES[x.t][1] : CATS[x.c][1];
 const emOf = x => x.t && TYPES[x.t] ? TYPES[x.t][0] : CATS[x.c][0];
-const MAIN_END = {};
-["d","c"].forEach(s=>{ const n={}; ITEMS.forEach(x=>{ if (x.s===s && x.e) n[x.e]=(n[x.e]||0)+1; }); MAIN_END[s]=Object.keys(n).sort((a,b)=>n[b]-n[a])[0]; });
-const endTxt = x => x.end && x.left > 1 && x.e !== MAIN_END[x.s] ? ` · jusqu'au ${pad(x.end.getDate())}/${pad(x.end.getMonth()+1)}` : "";
-const toolBtns = x => {
-  const inB = !!P.basket[x.id], hid = !!P.hidden[x.id];
-  return `<button class="addbtn" data-add="${x.id}" aria-pressed="${inB}" aria-label="${inB?"Retirer du":"Ajouter au"} panier : ${esc(x.n)}" title="${inB?"Retirer du panier":"Ajouter au panier"}">${inB?"✓":"+"}</button>` +
-    `<button class="hidebtn" data-hide="${x.id}" aria-label="${hid?"Réafficher":"Masquer"} : ${esc(x.n)}" title="${hid?"Réafficher":"Masquer cette promo"}">${hid?"↺":"✕"}</button>`;
-};
 
-function cardHTML(x){
-  const r = refOf(x, x.s);
-  return `<article class="card ${x.s}${P.hidden[x.id]?" hid":""}">
-    <a class="cph" href="${esc(x.l)}" target="_blank" rel="noopener" aria-label="Voir ${esc(x.n)} sur le site ${STORE[x.s]}">${x.img?`<img src="${x.img}" alt="" loading="lazy">`:`<span aria-hidden="true">${emOf(x)}</span>`}</a>
-    <div class="badges">${badges(x)}</div>
-    <div class="tools">${toolBtns(x)}</div>
-    <div class="cbody">
-      ${x.why1?`<div class="reason">${x.why1}${infoBtn(x)}</div>`:""}
-      <a class="cn" href="${esc(x.l)}" target="_blank" rel="noopener" title="${esc(x.n)}">${esc(x.n)}</a>
-      <div class="cb">${esc(x.b)}${x.z?` · ${esc(x.z)}`:""}${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}</div>
-      <div class="cdeal"><span class="tag">${esc(x.pr)}</span></div>
-      <div class="cprice">${priceHTML(x)}</div>
-      <div class="cvd">${x.why1?"":verdictTxt(x)}${r&&!x.why1?`<div class="cref"><span class="ring ${x.s}"></span>Marque maison <span class="nw"><b>${num(rv(r))} €/${uLbl(r.u,x.t)}</b>${P.nb&&r.nb?' <span class="nbtag">NB</span>':""}${infoBtn(x)}</span></div>`:x.why1?"":infoBtn(x)}${detailsHTML(x)}</div>
-    </div>
+// one verdict sentence, always naming the store whose own brand is the reference
+function verdict(x){
+  const S = STORE[x.s];
+  if (x.vd==="good") return {c:"good", t:`${pct(x.beat)} moins cher que la référence ${S}`};
+  if (x.vd==="same") return {c:"same", t:`Au prix de la référence ${S}`};
+  if (x.vd==="warn") return {c:"warn", t:`La référence ${S} est ${pct(x.gap)} moins chère`};
+  return {c:"none", t:"Comparaison indisponible"};
+}
+const NR = {type:"la catégorie de ce produit n'est pas reconnue", unit:"le magasin ne donne pas de prix au kilo, au litre ou à la pièce",
+  form:"le format n'est pas identifié (par exemple capsules ou moulu, liquide ou tablettes)",
+  nocmp:"les produits de cette catégorie (vins, plats préparés, pains, glaces…) sont trop différents entre eux pour une comparaison honnête", none:"aucun produit de marque du magasin du même format et de la même unité"};
+
+function storeBadge(s){ return `<span class="store"><span class="dot ${s}" aria-hidden="true"></span>${STORE[s]}</span>`; }
+function imgHTML(x, cls){ return `<a class="o-img${cls?" "+cls:""}" href="${esc(x.l)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${x.img?`<img src="${x.img}" alt="" loading="lazy">`:`<span>${emOf(x)}</span>`}</a>`; }
+function metaHTML(x){ return `${esc(x.b)}${x.z?` · ${esc(x.z)}`:""}${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}" aria-label="Nutri-Score ${x.ns}">${x.ns}</span>`:""}`; }
+function flags(x){
+  const b = [];
+  if (x.nw) b.push(["new","Nouveau"]);
+  if (x.stock) b.push(["stock","Bon plan qui se garde"]);
+  if (x.up) b.push(["up","Prix habituel en hausse"]);
+  if (x.hx) b.push(["muted","Souvent en promo"]);
+  return b.length ? `<div class="flags">${b.map(([c,t])=>`<span class="bdg ${c}">${t}</span>`).join("")}</div>` : "";
+}
+function endHTML(x){
+  if (!x.end) return "";
+  if (x.left===0) return `<p class="o-end soon">Dernier jour : ${fmtD(x.end)}</p>`;
+  if (x.left===1) return `<p class="o-end soon">Finit demain, ${fmtD(x.end)}</p>`;
+  return `<p class="o-end">Jusqu'au ${fmtD(x.end)}</p>`;
+}
+// what you pay, for how many, per pack and per kilo/litre; the store's mechanic stays secondary
+function priceHTML(x){
+  if (!x.ok) return `<div class="o-price"><p class="o-tot"><b>${eur(x.p)}</b><span>prix habituel</span></p>${x.v?`<p class="o-unit">${per(x.v,x.uu,x.t)}</p>`:""}
+    <p class="o-mech"><span class="tag">${esc(x.pr)}</span><span class="o-warn">Offre à vérifier en magasin</span></p></div>`;
+  const u = [];
+  if (x.q>1) u.push(`${eur(x.pe)}/${nounOf(x,1)}`);
+  if (x.ev) u.push(per(x.ev,x.uu,x.t));
+  return `<div class="o-price"><p class="o-tot"><b>${eur(x.tot)}</b>${x.q>1?`<span>pour ${qtyTxt(x,x.q)}</span>`:""}</p>
+    ${u.length?`<p class="o-unit">${u.join(" · ")}</p>`:""}
+    <p class="o-mech"><span class="tag">${esc(x.pr)}</span><span>au lieu de ${eur(x.q*x.p)}</span></p></div>`;
+}
+function addBtn(x, cls){
+  const n = P.basket[x.id];
+  return n ? `<button class="btn in ${cls||"sm"}" data-add="${x.id}" aria-pressed="true" title="Retirer de ma liste">✓ Dans ma liste<span class="vh"> : ${esc(nameOf(x))}</span></button>`
+           : `<button class="btn primary ${cls||"sm"}" data-add="${x.id}" aria-pressed="false">+ Ajouter à ma liste<span class="vh"> : ${esc(nameOf(x))}</span></button>`;
+}
+function offerHTML(x, why){
+  const v = verdict(x), hid = !!P.hidden[x.id], nm = nameOf(x);
+  return `<article class="offer${hid?" hid":""}">
+    <div class="o-media">${imgHTML(x)}${storeBadge(x.s)}${flags(x)}</div>
+    <div class="o-main"><h3 class="o-name"><a href="${esc(x.l)}" target="_blank" rel="noopener" title="${esc(nm)}">${esc(nm)}</a></h3><p class="o-meta">${metaHTML(x)}</p></div>
+    ${priceHTML(x)}
+    <p class="o-vd ${v.c}">${v.t}</p>
+    ${why?`<p class="o-why">${why}</p>`:""}
+    ${endHTML(x)}
+    <div class="o-act"><button class="btn ghost sm" data-why="${x.id}" aria-haspopup="dialog">Voir le calcul<span class="vh"> : ${esc(nm)}</span></button>${hid?`<button class="btn sm" data-hide="${x.id}">Réafficher<span class="vh"> : ${esc(nm)}</span></button>`:addBtn(x)}</div>
   </article>`;
 }
-function rowHTML(x){
-  return `<div class="row ${x.s}${P.hidden[x.id]?" hid":""}">
-    <a class="ph" href="${esc(x.l)}" target="_blank" rel="noopener" aria-label="Voir ${esc(x.n)} sur le site ${STORE[x.s]}">${x.img?`<img src="${x.img}" alt="" loading="lazy">`:`<span aria-hidden="true">${emOf(x)}</span>`}</a>
-    <div class="name">${x.why1?`<div class="reason" style="margin-bottom:3px">${x.why1}</div>`:""}<div class="t"><a href="${esc(x.l)}" target="_blank" rel="noopener">${esc(x.n)}</a>${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}${x.hb?'<span class="mark">marque maison</span>':""}${badges(x)}</div><div class="b">${esc(x.b)}${x.z?` · ${esc(x.z)}`:""} · ${emOf(x)} ${CATS[x.c][1]}${endTxt(x)}</div></div>
-    <div class="deal"><span class="tag">${esc(x.pr)}</span></div>
-    <div class="add">${toolBtns(x)}</div>
-    <div class="price">${priceHTML(x)}</div>
-    ${hbLine(x)}
-  </div>`;
+const itemsHTML = (list, why) => `<div class="${MODE==="cards"?"grid":"list"}">${list.map(x=>offerHTML(x, why&&why(x))).join("")}</div>`;
+
+// ---- calculation details (dialog) ----
+function detailHTML(x){
+  const S = STORE[x.s], o = x.s==="d"?"c":"d", same = refOf(x, x.s), other = refOf(x, o), nm = nameOf(x), v = verdict(x);
+  const row = (k, val, cls) => `<div${cls?` class="${cls}"`:""}><dt>${k}</dt><dd>${val}</dd></div>`;
+  let calc;
+  if (x.ok){
+    const r = [row("Quantité à acheter", `<b>${qtyTxt(x,x.q)}</b>`), row("Prix à payer", `<b>${eur(x.tot)}</b>`, "tot"),
+      row(x.q>1?"Même quantité au prix habituel":"Prix habituel", x.q>1?`${x.q} × ${eur(x.p)} = ${eur(x.q*x.p)}`:eur(x.p)),
+      row("Réduction", `${eur(x.save)} de moins, soit ${pct(x.d)}`)];
+    const eff = [x.q>1?`${eur(x.pe)}/${nounOf(x,1)}`:"", x.ev?`${per(x.ev,x.uu,x.t)} <span class="mut">au lieu de ${per(x.v,x.uu,x.t)}</span>`:""].filter(Boolean);
+    if (eff.length) r.push(row("Prix effectif", eff.join("<br>")));
+    calc = `<dl class="calc">${r.join("")}</dl>${x.mix?`<p class="scope">Calcul pour ${qtyTxt(x,x.q)} de ce produit. Si l'offre accepte un mélange de produits, le total dépend de ceux que vous choisissez.</p>`:""}`;
+  } else {
+    calc = `<dl class="calc">${row("Prix affiché", `<b>${eur(x.p)}</b> <span class="mut">(prix habituel)</span>`, "tot")}${x.v?row("Prix habituel "+perPhrase(x.uu,x.t), per(x.v,x.uu,x.t)):""}</dl>
+      <p class="scope">On n'a pas pu lire cette offre de façon fiable (${esc(x.why||"conditions non reconnues")}). Elle est affichée telle quelle, sans calcul : vérifiez en magasin.</p>`;
+  }
+  let cmp;
+  if (same && x.beat!=null){
+    const boosted = P.nb && same.nb;
+    cmp = `<p class="o-vd ${v.c}" style="margin-top:0">${v.t}</p>
+      <dl class="calc" style="margin-top:8px">${row("Cette offre", per(x.ev,x.uu,x.t))}${row(`Référence ${S}`, `${per(rv(same),same.u,x.t)}${boosted?'<span class="nbtag">Nutri-Boost</span>':""}`)}</dl>
+      <div class="ref">Référence : <a href="${esc(same.l)}" target="_blank" rel="noopener">${esc(same.n)}</a>, ${eur(same.p)} au prix habituel${boosted?", Nutri-Boost −10 % inclus":""}.</div>
+      <p class="scope">Portée : le produit de marque ${S} le moins cher de la catégorie « ${esc(famLabel(x))} »${x.fl?`, au format ${esc(x.fl)}`:""}, vendu ${perPhrase(x.uu,x.t)}, chez ${S} uniquement. Ce n'est pas une comparaison entre magasins.${x.hb?` Ce produit est lui-même une marque du magasin : il est comparé à une autre marque ${S}, jamais à lui-même.`:""}</p>`;
+    if (x.top && x.alts) cmp += `<p class="scope"><b>Prix ${perPhrase(x.uu,x.t)} le plus bas parmi ${x.alts+1} vraies affaires comparables</b> dans vos essentiels (même catégorie, même format, même unité, au moins 15 % moins chères que leur référence).</p>`;
+  } else {
+    cmp = `<p class="o-vd none" style="margin-top:0">Comparaison indisponible</p>
+      <p class="scope" style="margin-top:4px">${x.ok ? (NR[x.nr]||NR.none)[0].toUpperCase()+(NR[x.nr]||NR.none).slice(1) : "L'offre n'a pas pu être lue"}. Ce n'est pas un mauvais signe${x.nr==="nocmp" ? "." : " : on n'a simplement pas de référence assez proche pour comparer honnêtement."}</p>`;
+  }
+  if (other) cmp += `<p class="scope">Pour info, chez ${STORE[o]} : <a href="${esc(other.l)}" target="_blank" rel="noopener">${esc(other.n)}</a>, ${per(rv(other),other.u,x.t)} au prix habituel. Autre magasin, autre référence : à titre indicatif.</p>`;
+  const cond = [`<li>Offre en magasin : <b>« ${esc(x.raw)} »</b>${x.tier?`. Palier suivant : ${esc(x.tier)}`:""}</li>`];
+  if (x.end) cond.push(`<li>Valable jusqu'au <b>${fmtD(x.end)}</b> chez ${STORE_L[x.s]}${x.left===0?" (dernier jour)":x.left===1?" (finit demain)":""}.</li>`);
+  if (x.hx) cond.push(`<li>Souvent en promo : ${x.hx} semaines sur les 4 dernières. Le prix habituel est un peu théorique.</li>`);
+  if (x.up) cond.push(`<li>Le prix habituel a augmenté de plus de 3 % depuis un relevé précédent.</li>`);
+  if (x.dn) cond.push(`<li>Libellé du magasin : « ${esc(x.n)} »</li>`);
+  return `<div class="d-head"><h2 id="dlg-t">${esc(nm)}<span class="sub" style="display:block">${metaHTML(x)}</span></h2><button class="d-x" data-close="1" aria-label="Fermer">✕</button></div>
+    <div class="d-body">
+      <div class="dprod">${imgHTML(x)}<div>${storeBadge(x.s)}<p class="o-meta" style="margin-top:6px"><span class="tag">${esc(x.pr)}</span></p></div></div>
+      <section class="d-sec"><h3>Le calcul</h3>${calc}</section>
+      <section class="d-sec"><h3>Comparaison avec la marque du magasin</h3>${cmp}</section>
+      <section class="d-sec"><h3>Conditions</h3><ul>${cond.join("")}</ul><p style="margin-top:10px"><a href="${esc(x.l)}" target="_blank" rel="noopener">Voir le produit sur ${x.s==="d"?"delhaize.be":"carrefour.be"}</a></p></section>
+    </div>
+    <div class="d-foot"><button class="btn quiet sm grow" data-hide="${x.id}">${P.hidden[x.id]?"Réafficher cette offre":"Masquer cette offre"}</button>${addBtn(x, "")}</div>`;
 }
-const itemsHTML = list => MODE==="cards" ? `<div class="grid">${list.map(cardHTML).join("")}</div>` : `<div class="list">${list.map(rowHTML).join("")}</div>`;
 
 // ---- best deals: one per product family, only defensible comparisons ----
 // Within a family, alternatives of the same form and unit are compared on effective unit price;
@@ -640,21 +731,18 @@ function topPicks(list){
   }
   return picks.sort((a,b)=>b.beat-a.beat).slice(0,8);
 }
-function reasonOf(x){
-  const r = refOf(x, x.s);
-  return `${pct(x.beat)} sous la marque maison (${num(rv(r))} €/${uLbl(r.u,x.t)})` +
-    (x.alts ? `<span class="r2"><br>Meilleur prix ${perPhrase(x.uu,x.t)} sur ${x.alts+1} offres comparables</span>` : "");
-}
+// the "lowest price" claim always carries its scope: deals of the same family, form and unit
+const reasonOf = x => x.alts ? `Prix ${perPhrase(x.uu,x.t)} le plus bas parmi ${x.alts+1} vraies affaires comparables` : "";
 
 // ---- filters & sorting ----
 const FILTERS = [
-  ["beat","Bat la marque maison", x=>x.beat!=null && x.beat>0],
-  ["soon","Bientôt fini", x=>x.left!=null && x.left<=1],
-  ["nw","Nouveau", x=>!!x.nw],
-  ["stock","À stocker", x=>x.stock],
+  ["beat","Moins cher que la référence", x=>x.beat!=null && x.beat>0],
+  ["soon","Finit d'ici demain", x=>x.left!=null && x.left<=1],
+  ["nw","Nouveau cette semaine", x=>!!x.nw],
+  ["stock","Bon plan qui se garde", x=>x.stock],
 ];
-const MINS = [[25,"−25 % et plus"],[33,"−33 % et plus"],[50,"−50 % et plus"]];
-const SORTS = [["beat","Vraie affaire"],["disc","Remise"],["save","Économie par offre"],["unit","Prix au kilo / litre"],["price","Prix à payer"]];
+const MINS = [[0,"Toutes les réductions"],[25,"25 % et plus"],[33,"33 % et plus"],[50,"50 % et plus"]];
+const SORTS = [["beat","Meilleure affaire d'abord"],["disc","Plus forte réduction"],["save","Plus grosse économie"],["unit","Prix au kilo ou au litre"],["price","Prix à payer"]];
 function scope(base){
   const q = norm(state.q.trim());
   return base.filter(x=> !x.gone && (state.f.hidden ? !!P.hidden[x.id] : !P.hidden[x.id]) &&
@@ -669,30 +757,36 @@ function sorter(a,b){
   if (state.sort==="unit") return (a.uu||"~").localeCompare(b.uu||"~") || (a.ev??1e9)-(b.ev??1e9);
   return a.pay-b.pay;
 }
-function minRef(list, s){
-  let m=null; list.forEach(x=>{ const r=refOf(x,s); if (r && (!m || (r.u===m.u && rv(r)<rv(m)))) m=r; }); return m;
-}
 
-function renderPills(base){
-  const sc = scope(base);
+function renderPanel(base){
+  const sc = scope(base), scq = sc.filter(quick), scc = sc.filter(x=>!state.cats.length||state.cats.includes(x.c));
   const nHidden = base.filter(x=>!x.gone && P.hidden[x.id] && (state.store==="all"||x.s===state.store)).length;
-  const pill = (attr, val, label, on, n) => `<button class="pill" ${attr}="${val}" aria-pressed="${on}">${label}${n!=null?`<span class="n">${n}</span>`:""}</button>`;
-  const sel = (id, lb, opts, cur, on, short) => `<label class="pill sel" aria-pressed="${on}"><span class="lb opt">${lb}</span><span class="v${short?" d":""}">${esc(opts.find(o=>o[0]===cur)[1])}</span>${short?`<span class="v m">${short}</span>`:""}<select id="${id}" aria-label="${lb}">${opts.map(([k,l])=>`<option value="${k}"${k===cur?" selected":""}>${l}</option>`).join("")}</select></label>`;
-  const nc = state.cats.length, cat = nc===1 ? CATS[state.cats[0]][0]+" "+CATS[state.cats[0]][1] : `${nc} rayons`;
-  document.getElementById("pills").innerHTML =
-    `<div class="prow sels">` + sel("sort","Trier :",SORTS,state.sort,false) +
-    `<button class="pill dd" data-catp="1" aria-expanded="${!!state.catOpen}" aria-controls="chips" aria-pressed="${nc>0}"><span class="lb opt">Rayon :</span> <span class="v">${!nc?`<span class="v d">Tous</span><span class="v m">Tous rayons</span>`:cat}</span></button>` +
-    sel("min","Remise :",[[0,"toutes"],...MINS],state.min,state.min>0,state.min?`−${state.min} %+`:"Remise") +
-    `</div><span class="sep"></span><div class="prow flts">` +
-    FILTERS.filter(([k])=>k!=="nw"||DATA.hist).map(([k,l,fn])=>pill("data-flt",k,l,!!state.f[k],sc.filter(fn).length)).join("") +
-    (nHidden||state.f.hidden ? pill("data-flt","hidden","Masquées",!!state.f.hidden,nHidden) : "") + `</div>`;
+  const counts = {}; scq.forEach(x=>counts[x.c]=(counts[x.c]||0)+1);
+  const opt = (opts, cur) => opts.map(([k,l])=>`<option value="${k}"${k===cur?" selected":""}>${l}</option>`).join("");
+  const flt = FILTERS.filter(([k])=>k!=="nw"||DATA.hist).map(([k,l,fn])=>`<button class="chip" data-flt="${k}" aria-pressed="${!!state.f[k]}">${l}<span class="n">${scc.filter(fn).length}</span></button>`);
+  if (nHidden || state.f.hidden) flt.push(`<button class="chip" data-flt="hidden" aria-pressed="${!!state.f.hidden}">Offres masquées<span class="n">${nHidden}</span></button>`);
+  document.getElementById("fpanel").innerHTML = `
+    <div class="fcols">
+      <div class="fsec"><h3><label for="sort">Trier par</label></h3><select class="fsel" id="sort">${opt(SORTS,state.sort)}</select></div>
+      <div class="fsec"><h3><label for="min">Réduction minimale</label></h3><select class="fsel" id="min">${opt(MINS,state.min)}</select></div>
+    </div>
+    <div class="fsec"><h3 id="h-rayons">Rayons</h3><div class="frow" role="group" aria-labelledby="h-rayons">${
+      CAT_ORDER.filter(k=>counts[k]||state.cats.includes(k)).map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cats.includes(k)}"><span aria-hidden="true">${CATS[k][0]}</span>${CATS[k][1]}<span class="n">${counts[k]||0}</span></button>`).join("")}</div></div>
+    <div class="fsec"><h3 id="h-only">Afficher seulement</h3><div class="frow" role="group" aria-labelledby="h-only">${flt.join("")}</div></div>
+    <div class="prefs">
+      <div class="fsec"><h3 id="h-disp">Affichage</h3><div class="seg" role="group" aria-labelledby="h-disp">
+        <button data-mode="cards" aria-pressed="${MODE==="cards"}">▦ Cartes</button><button data-mode="list" aria-pressed="${MODE==="list"}">☰ Liste</button></div></div>
+      <div class="fsec"><h3>Carte SuperPlus Delhaize</h3>
+        <label class="nbt" for="nb"><input type="checkbox" id="nb" role="switch" aria-describedby="nb-help"${P.nb?" checked":""}><span class="sw" aria-hidden="true"></span>J'ai Nutri-Boost</label>
+        <p class="nbhelp" id="nb-help">Activé, les références Delhaize Nutri-Score A ou B comptent avec −10 %, comme en caisse. Les prix des promos ne changent pas : la remise ne se cumule pas.</p></div>
+    </div>`;
 }
 function activeFilters(){
   const a = [];
   state.cats.forEach(k=>a.push(["cat:"+k, CATS[k][0]+" "+CATS[k][1]]));
-  if (state.min) a.push(["min", `−${state.min} % et plus`]);
+  if (state.min) a.push(["min", `Réduction de ${state.min}${NB}% et plus`]);
   FILTERS.forEach(([k,l])=>{ if (state.f[k]) a.push(["f:"+k, l]); });
-  if (state.f.hidden) a.push(["f:hidden","Promos masquées"]);
+  if (state.f.hidden) a.push(["f:hidden","Offres masquées"]);
   return a;
 }
 function renderActive(){
@@ -700,223 +794,319 @@ function renderActive(){
   n.hidden = !a.length; n.textContent = a.length;
   document.getElementById("fbtn").setAttribute("aria-expanded", state.fopen);
   document.getElementById("fpanel").hidden = !state.fopen;
-  const sortTxt = state.sort!=="beat" ? `<span>Tri : ${esc(SORTS.find(o=>o[0]===state.sort)[1])}</span>` : "";
-  document.getElementById("activef").innerHTML = a.length || sortTxt ? sortTxt + a.map(([k,l])=>`<button class="chip" data-unf="${k}" aria-label="Retirer le filtre ${esc(l)}">${esc(l)}</button>`).join("") +
-    (a.length>1?`<button class="linkbtn" data-unf="all">Tout retirer</button>`:"") : "";
-}
-function renderChips(base){
-  const sc = scope(base).filter(quick);
-  const counts = {}; sc.forEach(x=>counts[x.c]=(counts[x.c]||0)+1);
-  const el = document.getElementById("chips"); el.hidden = !state.catOpen;
-  el.innerHTML =
-    `<button class="chip" data-cat="all" aria-pressed="${!state.cats.length}"><span class="em">🛒</span>Tous les rayons<span class="n">${sc.length}</span></button>` +
-    CAT_ORDER.filter(k=>counts[k]||state.cats.includes(k)).map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cats.includes(k)}"><span class="em">${CATS[k][0]}</span>${CATS[k][1]}<span class="n">${counts[k]||0}</span></button>`).join("");
+  const bits = a.map(([k,l])=>`<button class="chip" data-unf="${k}" aria-label="Retirer le filtre : ${esc(l)}">${esc(l)}</button>`);
+  if (state.sort!=="beat") bits.push(`<span>Tri : ${esc(SORTS.find(o=>o[0]===state.sort)[1].toLowerCase())}</span>`);
+  if (P.nb) bits.push(`<span>Nutri-Boost pris en compte</span>`);
+  if (a.length || state.sort!=="beat") bits.push(`<button class="linkbtn" data-unf="all">Tout réinitialiser</button>`);
+  document.getElementById("activef").innerHTML = bits.join("");
 }
 
 function renderHeader(){
-  const parts = [];
-  for (const s of ["d","c"]){
-    const ends = {}; ITEMS.filter(x=>x.s===s&&x.end&&!x.gone).forEach(x=>{ const k=x.end.getTime(); ends[k]=(ends[k]||0)+1; });
-    const tot = ITEMS.filter(x=>x.s===s&&!x.gone).length;
-    const main = Object.entries(ends).filter(([,n])=>n>=Math.max(10,tot*.05)).map(([k])=>new Date(+k)).sort((a,b)=>a-b);
-    const txt = main.length ? `jusqu'au ${main.map(fmtD).join(" ou ")}` : "";
-    parts.push(`<span><span class="ring ${s}"></span><b>${s==="d"?"Delhaize":"Carrefour Market"}</b> ${txt}</span>`);
-  }
-  parts.push(`<span>Relevé le ${fmtD(PULLED)}</span><span id="sync"></span>`);
-  document.getElementById("weeks").innerHTML = parts.join("");
+  document.getElementById("updated").innerHTML = `Mis à jour le <b>${fmtD(PULLED)}</b>`;
   const age = Math.round((TODAY-PULLED)/864e5), live = ITEMS.filter(x=>!x.gone).length;
   const st = document.getElementById("stale");
   if (age>7 || live < ITEMS.length*.5){ st.hidden=false; st.textContent = `Ces promos ont été relevées le ${fmtD(PULLED)}, il y a ${age} jours. ${live? "Une partie des offres a expiré et" : "Les offres ont expiré et"} les nouvelles ne sont pas encore chargées.`; }
-  document.getElementById("src").textContent = `Sources : promotions sur delhaize.be et folder hebdomadaire Carrefour Market sur carrefour.be, relevés le ${pad(PULLED.getDate())}/${pad(PULLED.getMonth()+1)}. Les prix en ligne peuvent différer légèrement du magasin. Produits bébé exclus.`;
+  const src = `Sources : promotions sur delhaize.be et folder hebdomadaire Carrefour Market sur carrefour.be, relevés le ${fmtD(PULLED)}.`;
+  document.getElementById("src").textContent = src; document.getElementById("help-src").textContent = src;
 }
 
-function renderSummary(){
-  const live = ITEMS.filter(vis0), stap = new Set(ST());
-  const mine = live.filter(x=>stap.has(x.t) && isDeal(x)), deals = live.filter(isDeal), soon = live.filter(x=>x.left!=null && x.left<=1);
-  const pl = (n, one, many) => `<b>${n}</b> ${n>1?many:one}`;
-  document.getElementById("summary").innerHTML =
-    `<button class="linkbtn" data-go="top">${pl(mine.length,"vraie affaire","vraies affaires")} dans vos essentiels</button>` +
-    `<button class="linkbtn" data-go="beat">${pl(deals.length,"vraie affaire","vraies affaires")} au total</button>` +
-    (soon.length ? `<button class="linkbtn" data-go="soon">${pl(soon.length,"offre finit","offres finissent")} d'ici demain</button>` : "") +
-    `<span>${live.length} promos relevées${DATA.hist?` dont ${live.filter(x=>x.nw).length} nouvelles`:""}</span>`;
+// results line + friendly no-results state, shared by both offer views
+function resultsHTML(n, what){
+  const q = state.q.trim(), where = state.store!=="all" ? ` chez ${STORE[state.store]}` : "";
+  return `<p class="results" role="status"><span><b>${plural(n, what[0], what[1])}</b>${q?` pour « ${esc(q)} »`:""}${where}</span>${q?`<button class="linkbtn" data-clearq="1">Effacer la recherche</button>`:""}</p>`;
+}
+function noResultsHTML(){
+  const acts = [];
+  if (state.q.trim()) acts.push(`<button class="btn primary" data-clearq="1">Effacer la recherche</button>`);
+  if (activeFilters().length) acts.push(`<button class="btn" data-unf="all">Réinitialiser les filtres</button>`);
+  if (state.store!=="all") acts.push(`<button class="btn" data-store="all">Voir les deux magasins</button>`);
+  return `<div class="empty"><span class="em" aria-hidden="true">🔎</span><h2>Aucune offre trouvée. On essaie un autre mot ?</h2>
+    <p>${state.q.trim()?`Rien pour « ${esc(state.q.trim())} »${state.store!=="all"?` chez ${STORE[state.store]}`:""} avec ces réglages.`:"Rien ne correspond à ces filtres cette semaine."}</p>${acts.length?`<div class="acts">${acts.join("")}</div>`:""}</div>`;
 }
 
-function editorHTML(){
-  const cur = new Set(ST()), byCat = {};
-  Object.keys(TYPES).forEach(k=>{ const c = TCAT[k]||"other"; (byCat[c]=byCat[c]||[]).push(k); });
-  const cnt = {}; ITEMS.forEach(x=>{ if (x.t && !x.gone) cnt[x.t]=(cnt[x.t]||0)+1; });
-  return `<section class="editor" aria-label="Modifier mes essentiels">
-    <div class="edhead"><h3>Mes essentiels</h3><span class="hint">${cur.size} familles suivies. Le chiffre indique les promos de cette semaine.</span>
-      <div class="actions"><button class="btn" data-ed="clear">Tout effacer</button><button class="btn" data-ed="reset">Liste de départ</button><button class="btn primary" data-ed="close">Terminé</button></div></div>
-    ${[...CAT_ORDER,"other"].filter(c=>byCat[c]).map(c=>`<fieldset><legend>${c==="other"?"Pas de promo cette semaine":CATS[c][0]+" "+CATS[c][1]}</legend><div class="fams">${
-      byCat[c].map(k=>`<label class="fam"><input type="checkbox" data-fam="${k}" ${cur.has(k)?"checked":""}><span>${TYPES[k][0]} ${esc(TYPES[k][1])}</span><span class="n">${cnt[k]||""}</span></label>`).join("")}</div></fieldset>`).join("")}
-  </section>`;
+function renderAll(v){
+  renderPanel(ITEMS);
+  const list = filtered(ITEMS).sort(sorter);
+  const cap = MODE==="cards" ? 60 : 120;
+  const shown = list.slice(0, state.open.all ? list.length : cap);
+  v.innerHTML = list.length ? resultsHTML(list.length, ["offre","offres"]) + itemsHTML(shown) +
+    (list.length>shown.length?`<p class="more"><button class="btn" data-more="all">Afficher les ${int(list.length-shown.length)} autres offres</button></p>`:"")
+    : noResultsHTML();
 }
 
-function render(){
-  ITEMS.forEach(compute); renderHeader(); renderSummary();
-  const live = ITEMS.filter(vis0), stap = new Set(ST());
-  document.getElementById("n-staples").textContent = live.filter(x=>stap.has(x.t)).length;
-  document.getElementById("n-all").textContent = live.length;
-  document.getElementById("n-basket").textContent = Object.keys(P.basket).length || "";
-  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", t.dataset.view===state.view));
-  document.querySelectorAll("[data-store]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.store===state.store));
-  document.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.mode===MODE));
-  document.getElementById("nb").checked = P.nb;
-  document.getElementById("filters").hidden = state.view==="basket" || state.edit;
-  renderActive();
-  const v = document.getElementById("view");
-
-  if (state.view==="all"){
-    renderPills(ITEMS); renderChips(ITEMS);
-    const list = filtered(ITEMS).sort(sorter);
-    const cap = MODE==="cards" ? 60 : 120;
-    const shown = list.slice(0, state.open.all ? list.length : cap);
-    v.innerHTML = list.length ? itemsHTML(shown) +
-      (list.length>shown.length?`<button class="more" data-more="all">Tout afficher (${list.length})</button>`:"")
-      : `<p class="empty">Aucune promo ne correspond. Retirez un filtre ou essayez un autre mot.</p>`;
+function renderStaples(v){
+  const stap = ST(), set = new Set(stap), first = P.staples===null;
+  const base = ITEMS.filter(x=>set.has(x.t));
+  renderPanel(base);
+  const head = (sub) => `<div class="shead"><div><h2>Mes essentiels</h2><p class="sub">${sub}</p></div><button class="btn" data-ed="open" aria-haspopup="dialog">✎ Modifier mes essentiels</button></div>`;
+  if (!stap.length){
+    v.innerHTML = head("Aucune catégorie suivie") + `<div class="empty"><span class="em" aria-hidden="true">🧺</span><h2>Aucune catégorie suivie pour l'instant.</h2>
+      <p>Choisissez les catégories qui finissent vraiment dans votre caddie : on vous montrera leurs meilleures promos, ici même.</p>
+      <div class="acts"><button class="btn primary" data-ed="open" aria-haspopup="dialog">Choisir mes catégories</button><button class="btn" data-view="all">Voir toutes les promos</button></div></div>`;
+    return;
   }
-
-  if (state.view==="staples"){
-    if (state.edit){ v.innerHTML = editorHTML(); return; }
-    const base = ITEMS.filter(x=>stap.has(x.t));
-    renderPills(base); renderChips(base);
-    const top = state.f.hidden ? [] : topPicks(scope(base));
-    const per = MODE==="cards" ? 4 : 3;
-    const groups = ST().map(k=>({k, all:scope(base.filter(x=>x.t===k)), items:filtered(base.filter(x=>x.t===k)).sort(sorter)})).filter(g=>g.items.length);
-    top.forEach(x=>x.why1 = reasonOf(x));
-    const topHTML = state.f.hidden ? "" : `<details class="topd" id="topd"${state.topOpen?" open":""}><summary>⭐ Les meilleures affaires de vos essentiels <span class="hint">${top.length ? `${top.length} produit${top.length>1?"s":""}, un par famille, au moins 15 % sous une marque maison comparable` : "aucune cette semaine"}</span></summary>${
-      top.length ? itemsHTML(top) : `<p class="empty-s">Aucune promo de vos essentiels ne coûte clairement moins cher (au moins 15 %) qu'une marque maison comparable cette semaine${state.store!=="all"?` chez ${STORE[state.store]}`:""}. Les autres promos restent listées ci-dessous.</p>`}</details>`;
-    top.forEach(x=>delete x.why1);
-    v.innerHTML = topHTML + `<div class="stapbar"><span>${stap.size} familles suivies</span><button class="linkbtn" data-ed="open">Modifier mes essentiels</button></div>` +
-      (groups.length ? groups.map(({k,all,items})=>{
-        const [em,label] = TYPES[k]; const b = topPicks(all)[0];
-        const stores = new Set(all.map(x=>x.s));
-        const shown = state.open[k] ? items : items.slice(0,per);
-        const rd = minRef(all,"d"), rc = minRef(all,"c");
-        const differs = all.some(x=>{ const r = refOf(x,x.s), m = x.s==="d"?rd:rc; return r && m && r.n!==m.n; });
-        return `<section class="group"><h3>${em} ${esc(label)}
-          ${b?`<span class="winner ${b.s}"><span class="ring ${b.s}"></span>Meilleure affaire : ${STORE[b.s]}, ${esc(b.pr)}, ${pct(b.beat)} sous sa marque maison</span>`:`<span class="hint">aucune vraie affaire vérifiée</span>`}
-          <span class="hint">${items.length} offre${items.length>1?"s":""}${stores.size===1?` · uniquement chez ${STORE[all[0].s]}`:""}</span></h3>
-          ${rd||rc?`<div class="ghb">Marque maison la moins chère de la famille : ${rd?refChip(rd,"d"):""} ${rc?refChip(rc,"c"):""}${differs?`<span>Chaque promo est comparée à la référence de son propre format (voir le i à côté de la marque maison).</span>`:""}</div>`:""}
-          ${itemsHTML(shown)}
-          ${items.length>per?`<button class="more" data-more="${k}">${state.open[k]?"Afficher moins":"Voir les "+items.length+" offres"}</button>`:""}</section>`;
-      }).join("") : stap.size ? `<p class="empty">Aucun de vos essentiels ne correspond à ces filtres.</p>`
-        : `<p class="empty">Votre liste d'essentiels est vide.<br><button class="btn primary" data-ed="open" style="margin-top:10px">Choisir mes essentiels</button></p>`);
-  }
-
-  if (state.view==="basket") renderBasket(v);
+  ITEMS.forEach(x=>{ delete x.top; delete x.alts; });
+  const top = state.f.hidden ? [] : topPicks(filtered(base));
+  top.forEach(x=>x.top = 1);
+  const groups = stap.map(k=>{
+    const items = filtered(base.filter(x=>x.t===k)).sort(sorter);
+    const deal = items.filter(isDeal), cmp = items.some(x=>x.beat!=null);
+    return {k, items, deal, cmp};
+  });
+  const withOffers = groups.filter(g=>g.items.length), empty = groups.filter(g=>!g.items.length);
+  const nOffers = withOffers.reduce((s,g)=>s+g.items.length, 0);
+  const sub = `${plural(stap.length,"catégorie suivie","catégories suivies")} · ${plural(nOffers,"offre","offres")} cette semaine${top.length?` · ${plural(top.length,"affaire mise","affaires mises")} en avant`:""}`;
+  const intro = first ? `<p class="intro"><span>On a coché une liste de courses type pour commencer. Gardez ce qui finit vraiment dans votre panier.</span><button class="linkbtn" data-ed="open" aria-haspopup="dialog">Faire le tri</button></p>` : "";
+  if (!nOffers){ v.innerHTML = head(sub) + intro + noResultsHTML(); return; }
+  const featured = state.f.hidden ? "" : `<section class="featured" aria-labelledby="h-top"><div class="shead"><div><h2 id="h-top">Les meilleures affaires</h2>
+      <p class="sub">${top.length ? `Une par catégorie, au moins 15${NB}% moins chère que la référence du même magasin.` : "Aucune offre de vos essentiels n'est au moins 15 % moins chère que sa référence cette semaine. Les offres restent listées plus bas."}</p></div></div>
+      ${top.length ? itemsHTML(top, reasonOf) : ""}</section>`;
+  const per = MODE==="cards" ? 8 : 6;
+  const famHTML = g => {
+    const [em,label] = TYPES[g.k], best = g.deal.length ? Math.max(...g.deal.map(x=>x.beat)) : 0;
+    const st = g.deal.length ? `<span class="st good">${g.deal.length>1?`${g.deal.length} vraies affaires`:"Vraie affaire"}, jusqu'à ${pct(best)} moins cher</span>`
+      : g.cmp ? `<span class="st plain">Pas d'affaire vérifiée</span>` : `<span class="st na">Comparaison indisponible</span>`;
+    const open = state.open["f:"+g.k] ?? g.deal.length>0;
+    const shown = state.open[g.k] ? g.items : g.items.slice(0,per);
+    return `<details class="fam" data-fam-d="${g.k}"${open?" open":""}><summary><span class="fname"><span class="em" aria-hidden="true">${em}</span>${esc(label)}</span>${st}<span class="fcount">${plural(g.items.length,"offre","offres")}</span></summary>
+      <div class="fbody">${itemsHTML(shown)}${g.items.length>per?`<p class="more"><button class="btn sm" data-more="${g.k}">${state.open[g.k]?"Afficher moins":`Voir les ${g.items.length} offres`}</button></p>`:""}</div></details>`;
+  };
+  const filt = state.q.trim() || state.store!=="all" || activeFilters().length;
+  v.innerHTML = head(sub) + intro + featured +
+    `<div class="shead"><div><h2>Toutes vos catégories</h2><p class="sub">Ouvertes quand elles ont une vraie affaire. Les autres se déplient d'un clic.</p></div></div>
+     <div class="fams">${withOffers.map(famHTML).join("")}</div>` +
+    (empty.length ? `<p class="quiet-list"><b>${filt?"Rien avec ces filtres":"Pas de promo cette semaine"} :</b> ${empty.map(g=>`${TYPES[g.k][0]}${NB}${esc(TYPES[g.k][1])}`).join(" · ")}</p>` : "");
 }
 
-// basket quantities are packs. Complete offer bundles get the offer price, the rest the regular price (prudent).
+// ---- Ma liste (stored as P.basket, in packs). Complete offer bundles get the offer price, the rest the regular price (prudent).
 function line(x, n){
   if (!x.ok) return {pay:n*x.p, reg:n*x.p, save:0, rest:0};
   const full = Math.floor(n/x.q), rest = n % x.q, pay = full*x.tot + rest*x.p;
   return {pay, reg:n*x.p, save:n*x.p - pay, rest, full};
 }
 function qtyNote(x, n, l){
-  if (!x.ok) return `<span class="qwarn">Offre non interprétée : prix habituel compté</span>`;
+  if (!x.ok) return `<p class="qnote warn">Offre non lue : comptée au prix habituel.</p>`;
   if (x.q===1) return "";
-  if (n < x.q) return `<span class="qwarn">L'offre demande ${x.q} unités : ${n} au prix habituel<button class="linkbtn" data-setq="${x.id}" data-n="${x.q}">Passer à ${x.q}</button></span>`;
-  if (l.rest) return `<span class="qwarn">${n-l.rest} au prix de l'offre, ${l.rest} au prix habituel (estimation prudente)<button class="linkbtn" data-setq="${x.id}" data-n="${n - l.rest + x.q}">Passer à ${n - l.rest + x.q}</button></span>`;
-  return `<span class="qok">✓ ${l.full>1?`${l.full} fois l'offre`:"Quantité de l'offre"}</span>`;
+  if (n < x.q) return `<p class="qnote warn">L'offre demande ${qtyTxt(x,x.q)}. Avec ${n}, vous payez le prix habituel. <button class="linkbtn" data-setq="${x.id}" data-n="${x.q}">Passer à ${x.q}</button></p>`;
+  if (l.rest) return `<p class="qnote warn">${qtyTxt(x,n-l.rest)} au prix de l'offre, ${l.rest} au prix habituel. <button class="linkbtn" data-setq="${x.id}" data-n="${n - l.rest + x.q}">Passer à ${n - l.rest + x.q}</button></p>`;
+  return `<p class="qnote ok">✓ ${l.full>1?`${l.full} fois l'offre`:"Quantité de l'offre"}</p>`;
 }
 function renderBasket(v){
   const ids = Object.keys(P.basket).filter(id=>BY_ID[id]);
-  if (!ids.length){ v.innerHTML = `<p class="empty">Votre panier est vide. Touchez <b>+</b> sur une promo pour préparer vos courses : la quantité exigée par l'offre est ajoutée, et le panier devient votre liste par magasin et par rayon, à cocher en magasin.</p>`; return; }
+  const head = `<div class="shead"><div><h2>Ma liste</h2><p class="sub">Pour vos courses en magasin : rangée par magasin et par rayon, à cocher au fil des allées.</p></div></div>`;
+  if (!ids.length){ v.innerHTML = head + `<div class="empty"><span class="em" aria-hidden="true">📝</span><h2>Votre liste attend ses premières bonnes affaires.</h2>
+    <p>Repérez une promo qui vous plaît et touchez « Ajouter à ma liste » : on s'occupe des quantités.</p>
+    <div class="acts"><button class="btn primary" data-view="staples">Voir les bonnes affaires</button><button class="btn" data-view="all">Toutes les promos</button></div></div>`; return; }
   const tot = {d:{pay:0,save:0,n:0,left:0}, c:{pay:0,save:0,n:0,left:0}};
   ids.forEach(id=>{ const x=BY_ID[id], l=line(x, P.basket[id]), t=tot[x.s]; t.pay+=l.pay; t.save+=l.save; t.n++; if (!P.checked[id]) t.left++; });
-  const card = s => tot[s].n ? `<div class="sum"><div class="k"><span class="ring ${s}"></span>${STORE[s]}</div><div class="v">${eur(tot[s].pay)}</div><div class="s">${tot[s].n} article${tot[s].n>1?"s":""}${tot[s].left<tot[s].n?`, ${tot[s].left} à prendre`:""} · ${eur(tot[s].save)} de moins qu'au prix habituel</div></div>` : "";
-  const row = x => { const n=P.basket[x.id], done=!!P.checked[x.id], l=line(x,n);
-    return `<div class="brow ${x.s}${done?" done":""}">
-      <label class="chk"><input type="checkbox" data-check="${x.id}" ${done?"checked":""} aria-label="Pris : ${esc(x.n)}"></label>
-      <a class="ph" href="${esc(x.l)}" target="_blank" rel="noopener" aria-label="Voir ${esc(x.n)}">${x.img?`<img src="${x.img}" alt="" loading="lazy">`:`<span aria-hidden="true">${emOf(x)}</span>`}</a>
-      <div class="name"><div class="t">${esc(x.n)}${badges(x)}</div><div class="b">${esc(x.b)}${x.z?` · ${esc(x.z)}`:""} · <b>${esc(x.pr)}</b> · ${n} × ${eur(x.p)} = ${eur(l.reg)} au prix habituel, <b>${eur(l.pay)}</b> à payer${l.save>0.004?`, ${eur(l.save)} de moins`:""}</div>${qtyNote(x,n,l)}</div>
-      <div class="r"><span class="qty"><button data-dec="${x.id}" aria-label="Une unité de moins">−</button>${n}<button data-inc="${x.id}" aria-label="Une unité de plus">+</button></span></div>
+  const card = s => tot[s].n ? `<div class="sum"><div class="k"><span class="dot ${s}" aria-hidden="true"></span>${STORE_L[s]}</div><div class="v">${eur(tot[s].pay)}</div><div class="s">${plural(tot[s].n,"article","articles")}${tot[s].left<tot[s].n?`, ${tot[s].left} à prendre`:""} · ${eur(tot[s].save)} économisés</div></div>` : "";
+  const row = x => { const n=P.basket[x.id], done=!!P.checked[x.id], l=line(x,n), nm=nameOf(x);
+    return `<div class="li${done?" done":""}">
+      <label class="chk"><input type="checkbox" data-check="${x.id}" ${done?"checked":""} aria-label="Pris : ${esc(nm)}"></label>
+      ${imgHTML(x)}
+      <div><p class="o-name">${esc(nm)}</p><p class="o-meta">${metaHTML(x)} · <span class="tag">${esc(x.pr)}</span></p>${qtyNote(x,n,l)}</div>
+      <div class="li-side"><div class="qty" role="group" aria-label="Quantité : ${esc(nm)}"><button data-dec="${x.id}" aria-label="Un de moins">−</button><output aria-live="polite">${qtyTxt(x,n)}</output><button data-inc="${x.id}" aria-label="Un de plus">+</button></div>
+        <p class="li-pay"><b>${eur(l.pay)}</b>${l.save>0.004?`<span>au lieu de ${eur(l.reg)}</span>`:""}</p></div>
     </div>`; };
   const sections = ["d","c"].filter(s=>tot[s].n).map(s=>{
     const mine = ids.map(id=>BY_ID[id]).filter(x=>x.s===s);
     const cats = CAT_ORDER.filter(c=>mine.some(x=>x.c===c));
-    return `<section class="group"><h3><span class="ring ${s}"></span>${STORE[s]} <span class="hint">${tot[s].left} à prendre sur ${tot[s].n}</span></h3>${
-      cats.map(c=>{ const l = mine.filter(x=>x.c===c).sort((a,b)=>(!!P.checked[a.id]-!!P.checked[b.id])||a.n.localeCompare(b.n,"fr"));
+    return `<section class="lstore"><h3><span class="dot ${s}" aria-hidden="true"></span>${STORE_L[s]} <span class="mut">${tot[s].left} à prendre sur ${tot[s].n}</span></h3>${
+      cats.map(c=>{ const l = mine.filter(x=>x.c===c).sort((a,b)=>(!!P.checked[a.id]-!!P.checked[b.id])||nameOf(a).localeCompare(nameOf(b),"fr"));
         return `<div class="aisle">${CATS[c][0]} ${CATS[c][1]}</div>${l.map(row).join("")}`; }).join("")}</section>`;
   }).join("");
   const nChecked = Object.keys(P.checked).length;
-  v.innerHTML = `<div class="basket-sum">${card("d")}${card("c")}
-      <div class="sum"><div class="k">Total à payer</div><div class="v">${eur(tot.d.pay+tot.c.pay)}</div><div class="s">${eur(tot.d.save+tot.c.save)} de moins que les mêmes quantités au prix habituel</div></div></div>
+  v.innerHTML = head + `<div class="lsum">${card("d")}${card("c")}
+      <div class="sum total"><div class="k">Total à payer</div><div class="v">${eur(tot.d.pay+tot.c.pay)}</div><div class="s">${eur(tot.d.save+tot.c.save)} de moins que les mêmes quantités au prix habituel</div></div></div>
     ${sections}
-    <div class="actions"><button class="btn primary" id="copy">Copier la liste de courses</button>${nChecked?`<button class="btn" id="rmchecked">Retirer ${nChecked>1?`les ${nChecked} articles cochés`:"l'article coché"}</button>`:""}<button class="btn" id="clear">Vider le panier</button></div>
-    <p class="note" id="copymsg" hidden></p>`;
+    <div class="lacts"><button class="btn primary" id="copy">Copier la liste</button>${nChecked?`<button class="btn" id="rmchecked">Retirer ${nChecked>1?`les ${nChecked} articles cochés`:"l'article coché"}</button>`:""}<button class="btn" id="clear">Vider la liste</button></div>
+    <p class="note mut" id="copymsg" role="status" style="margin-top:10px"></p>`;
 }
-
 function listText(){
   const out = [];
   for (const s of ["d","c"]){
     const mine = Object.keys(P.basket).map(id=>BY_ID[id]).filter(x=>x && x.s===s && !P.checked[x.id]); if (!mine.length) continue;
-    out.push(`*${STORE[s].toUpperCase()}*`);
+    out.push(`*${STORE_L[s].toUpperCase()}*`);
     CAT_ORDER.forEach(c=>{ const l = mine.filter(x=>x.c===c); if (!l.length) return;
       out.push(`${CATS[c][0]} ${CATS[c][1]}`);
       l.forEach(x=>{ const n=P.basket[x.id], ln=line(x,n);
-        out.push(`- ${n}× ${x.n} (${x.b}) – ${x.pr} – ${eur(ln.pay)}${x.ok && ln.rest ? ` (offre pour ${x.q}, ${ln.rest} au prix habituel)` : ""}`); }); });
+        out.push(`- ${qtyTxt(x,n)} ${nameOf(x)} (${x.b}) · ${x.pr} · ${eur(ln.pay)}${x.ok && ln.rest ? ` (offre pour ${x.q}, ${ln.rest} au prix habituel)` : ""}`); }); });
     out.push("");
   }
   return out.join("\n").trim();
 }
 
+// ---- render, keeping keyboard focus on the control that triggered it ----
+const FOCUS_KEYS = ["add","why","hide","inc","dec","check","more","ed","flt","cat","store","view","mode","unf","setq","clearq"];
+function focusKey(){
+  const a = document.activeElement; if (!a || a===document.body) return null;
+  for (const k of FOCUS_KEYS) if (a.dataset && a.dataset[k]!=null){
+    const sel = `[data-${k}="${CSS.escape(a.dataset[k])}"]`, all = [...document.querySelectorAll(sel)];
+    return {sel, i: Math.max(0, all.indexOf(a))};
+  }
+  return a.id ? {sel:"#"+CSS.escape(a.id), i:0} : null;
+}
+function render(){
+  const fk = focusKey();
+  ITEMS.forEach(compute); renderHeader();
+  document.getElementById("n-basket").textContent = Object.keys(P.basket).length || "";
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected", t.dataset.view===state.view));
+  document.querySelectorAll("#filters [data-store]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.store===state.store));
+  document.getElementById("filters").hidden = state.view==="basket";
+  document.getElementById("qclr").hidden = !state.q;
+  renderActive();
+  const v = document.getElementById("view");
+  v.setAttribute("aria-labelledby", "tab-"+state.view);
+  if (state.view==="all") renderAll(v);
+  if (state.view==="staples") renderStaples(v);
+  if (state.view==="basket") renderBasket(v);
+  const dlg = document.getElementById("dlg");
+  if (dlg.open && BY_ID[dlg.dataset.id]) dlg.innerHTML = detailHTML(BY_ID[dlg.dataset.id]);
+  if (fk){ const el = document.querySelectorAll(fk.sel)[fk.i] || document.querySelector(fk.sel); if (el && el!==document.activeElement) el.focus({preventScroll:true}); }
+}
+
+// ---- toast with optional undo; lives in the open dialog when there is one, so it is never hidden behind it ----
+let toastT = null, UNDO = null;
+function toast(msg, undo, label){
+  const t = document.getElementById("toast"), host = document.querySelector("dialog[open]") || document.body;
+  if (t.parentNode!==host) host.appendChild(t);
+  t.innerHTML = `<span>${msg}</span>${undo?`<button class="linkbtn" data-undo="1">${label||"Annuler"}</button>`:""}`;
+  t.hidden = false; UNDO = undo || null;
+  clearTimeout(toastT); toastT = setTimeout(()=>{ t.hidden = true; UNDO = null; }, undo ? 7000 : 4000);
+}
+
+// ---- dialogs ----
+let lastTrigger = null;
+function openDialog(d, trigger){
+  lastTrigger = trigger ? focusKeyOf(trigger) : null;
+  d.showModal();
+  const f = d.querySelector(".d-x"); if (f) f.focus();
+}
+function focusKeyOf(el){
+  for (const k of FOCUS_KEYS) if (el.dataset[k]!=null){ const sel=`[data-${k}="${CSS.escape(el.dataset[k])}"]`; return {sel, i:Math.max(0,[...document.querySelectorAll(sel)].indexOf(el)), el}; }
+  return {el};
+}
+function restoreFocus(){
+  const t = lastTrigger; lastTrigger = null; if (!t) return;
+  let el = t.el && t.el.isConnected ? t.el : t.sel ? (document.querySelectorAll(t.sel)[t.i] || document.querySelector(t.sel)) : null;
+  (el || document.getElementById("view")).focus({preventScroll:true});
+}
+document.querySelectorAll("dialog").forEach(d=>{
+  d.addEventListener("close", ()=>{ const t=document.getElementById("toast"); if (t.parentNode===d) document.body.appendChild(t); restoreFocus(); });
+  d.addEventListener("click", e=>{ if (e.target===d) d.close(); });   // click on the backdrop
+});
+function openDetail(id, trigger){
+  const d = document.getElementById("dlg"); d.dataset.id = id; d.innerHTML = detailHTML(BY_ID[id]); openDialog(d, trigger);
+}
+
+// essentials editor: a draft, saved only on "Enregistrer"
+let DRAFT = null;
+function editorHTML(){
+  const byCat = {}, cnt = {};
+  Object.keys(TYPES).forEach(k=>{ const c = TCAT[k]||"other"; (byCat[c]=byCat[c]||[]).push(k); });
+  ITEMS.forEach(x=>{ if (x.t && !x.gone) cnt[x.t]=(cnt[x.t]||0)+1; });
+  const total = Object.keys(TYPES).length;
+  return `<div class="d-head"><h2 id="ed-t">Modifier mes essentiels<span class="sub" style="display:block">Tout cocher, puis faire le tri. Le chiffre indique les promos de cette semaine.</span></h2><button class="d-x" data-close="1" aria-label="Fermer sans enregistrer">✕</button></div>
+    <div class="ed-bulk"><span class="ed-count" id="ed-count" aria-live="polite">${edCount()}</span>
+      <button class="btn sm" data-edb="all">Tout sélectionner</button><button class="btn sm" data-edb="none">Tout désélectionner</button><button class="btn sm ghost" data-edb="start">Liste de départ</button>
+      <span class="ed-note">Les boutons s'appliquent aux ${total} catégories, y compris celles sans promo cette semaine.</span></div>
+    <div class="d-body ed-body">${[...CAT_ORDER,"other"].filter(c=>byCat[c]).map(c=>`<fieldset><legend>${c==="other"?"Pas de promo cette semaine":CATS[c][0]+" "+CATS[c][1]}</legend><div class="ed-grid">${
+      byCat[c].map(k=>`<label class="edf"><input type="checkbox" data-edf="${k}" ${DRAFT.has(k)?"checked":""}><span>${TYPES[k][0]} ${esc(TYPES[k][1])}</span><span class="n">${cnt[k]?plural(cnt[k],"promo","promos"):""}</span></label>`).join("")}</div></fieldset>`).join("")}</div>
+    <div class="d-foot"><button class="btn" data-edb="cancel">Annuler</button><button class="btn primary" data-edb="save">Enregistrer</button></div>`;
+}
+const edCount = () => `${DRAFT.size} catégorie${DRAFT.size>1?"s":""} sur ${Object.keys(TYPES).length}`;
+function openEditor(trigger){
+  DRAFT = new Set(ST()); const d = document.getElementById("ed"); d.innerHTML = editorHTML(); openDialog(d, trigger);
+}
+function syncEditor(){
+  document.querySelectorAll("#ed [data-edf]").forEach(i=>i.checked = DRAFT.has(i.dataset.edf));
+  document.getElementById("ed-count").textContent = edCount();
+}
+
 function toTop(){ const b=document.getElementById("bar"); if (b.getBoundingClientRect().top < 0) b.scrollIntoView({block:"start"}); }
+function setQ(s){ state.q = s; document.getElementById("q").value = s; }
 document.addEventListener("click", e=>{
   const t = e.target.closest("button"); if (!t) return;
   const d = t.dataset;
-  if (d.why){ const o = t.getAttribute("aria-expanded")!=="true"; t.setAttribute("aria-expanded", o); t.closest(".card,.row").classList.toggle("whyopen", o); return; }
-  if (d.view){ state.view=d.view; state.cats=[]; state.edit=false; render(); return; }
+  if (d.close){ t.closest("dialog").close(); return; }
+  if (d.undo){ const u = UNDO; UNDO = null; document.getElementById("toast").hidden = true; if (u) u(); return; }
+  if (d.help){ openDialog(document.getElementById("help"), t); return; }
+  if (d.why){ openDetail(d.why, t); return; }
+  if (d.view){ state.view=d.view; state.cats=[]; render(); toTop(); return; }
   if (d.store){ state.store=d.store; state.cats=[]; render(); return; }
   if (d.mode){ MODE=d.mode; try{ localStorage.setItem("promo-mode",MODE); }catch(_){} render(); return; }
-  if (d.catp){ state.catOpen=!state.catOpen; render(); return; }
-  if (d.cat){ if (d.cat==="all") state.cats=[]; else { const i=state.cats.indexOf(d.cat); i<0 ? state.cats.push(d.cat) : state.cats.splice(i,1); } render(); return; }
-  if (d.sort){ state.sort=d.sort; render(); return; }
-  if (d.min){ state.min = state.min===+d.min ? 0 : +d.min; render(); return; }
-  if (d.flt){ state.f[d.flt]=!state.f[d.flt]; state.cats=[]; render(); return; }
-  if (d.go==="top"){ state.view="staples"; state.edit=false; state.topOpen=true; render(); const el=document.getElementById("topd"); if (el) el.scrollIntoView({block:"start"}); return; }
-  if (d.go){ state.view="all"; state.cats=[]; state.f={[d.go]:true}; state.min=0; if (d.go==="beat") state.sort="beat"; state.edit=false; render(); toTop(); return; }
+  if (d.cat){ const i=state.cats.indexOf(d.cat); i<0 ? state.cats.push(d.cat) : state.cats.splice(i,1); render(); return; }
+  if (d.flt){ state.f[d.flt]=!state.f[d.flt]; render(); return; }
   if (d.fopen){ state.fopen=!state.fopen; render(); return; }
-  if (d.unf){ if (d.unf==="all"){ state.cats=[]; state.min=0; state.f={}; } else if (d.unf.startsWith("cat:")) state.cats=state.cats.filter(k=>k!==d.unf.slice(4)); else if (d.unf==="min") state.min=0; else delete state.f[d.unf.slice(2)]; render(); return; }
+  if (d.clearq){ setQ(""); render(); document.getElementById("q").focus(); return; }
+  if (d.unf){ if (d.unf==="all"){ state.cats=[]; state.min=0; state.f={}; state.sort="beat"; } else if (d.unf.startsWith("cat:")) state.cats=state.cats.filter(k=>k!==d.unf.slice(4)); else if (d.unf==="min") state.min=0; else delete state.f[d.unf.slice(2)]; render(); return; }
   if (d.setq){ P.basket[d.setq]=+d.n; save(); render(); return; }
   if (d.more){ state.open[d.more]=!state.open[d.more]; render(); return; }
-  if (d.ed){
-    if (d.ed==="open") state.edit=true;
-    if (d.ed==="close") state.edit=false;
-    if (d.ed==="reset"){ P.staples=null; save(); }
-    if (d.ed==="clear"){ P.staples=[]; save(); }
-    render(); if (d.ed==="open"||d.ed==="close") toTop(); return;
+  if (d.ed){ openEditor(t); return; }
+  if (d.edb){
+    if (d.edb==="all") DRAFT = new Set(Object.keys(TYPES));
+    if (d.edb==="none") DRAFT = new Set();
+    if (d.edb==="start") DRAFT = new Set(DATA.staples);
+    if (d.edb==="cancel"){ document.getElementById("ed").close(); return; }
+    if (d.edb==="save"){
+      const prev = ST().filter(k=>DRAFT.has(k));   // keep the user's order, append new picks in catalogue order
+      P.staples = [...prev, ...Object.keys(TYPES).filter(k=>DRAFT.has(k) && !prev.includes(k))];
+      save(); document.getElementById("ed").close(); state.view="staples"; render();
+      toast(`Essentiels enregistrés : ${plural(P.staples.length,"catégorie","catégories")}.`); return;
+    }
+    syncEditor(); return;
   }
-  if (d.add){ const id=d.add; if (P.basket[id]){ delete P.basket[id]; delete P.checked[id]; } else P.basket[id]=BY_ID[id].ok ? BY_ID[id].q : 1; save(); render(); return; }
-  if (d.hide){ const id=d.hide; if (P.hidden[id]) delete P.hidden[id]; else P.hidden[id]=1; save(); render(); return; }
+  if (d.add){
+    const x = BY_ID[d.add], id = x.id;
+    if (P.basket[id]){ const n = P.basket[id], c = P.checked[id]; delete P.basket[id]; delete P.checked[id]; save(); render();
+      toast(`Retiré de votre liste : ${esc(nameOf(x))}.`, ()=>{ P.basket[id]=n; if (c) P.checked[id]=1; save(); render(); }); }
+    else { const n = x.ok ? x.q : 1; P.basket[id]=n; save(); render();
+      toast(`Ajouté : ${qtyTxt(x,n)} dans votre liste${x.ok&&x.q>1?`, la quantité de l'offre`:""}.`, ()=>{ delete P.basket[id]; delete P.checked[id]; save(); render(); }); }
+    return;
+  }
+  if (d.hide){
+    const x = BY_ID[d.hide], id = x.id, dlg = document.getElementById("dlg");
+    if (P.hidden[id]){ delete P.hidden[id]; save(); render(); toast("Offre réaffichée."); return; }
+    P.hidden[id]=1; save(); render();
+    if (dlg.open) dlg.close();   // after render: the card is gone, so focus falls back to the results
+    toast(`Offre masquée jusqu'à la fin de la promo.`, ()=>{ delete P.hidden[id]; save(); render(); });
+    return;
+  }
   if (d.inc){ P.basket[d.inc]++; save(); render(); return; }
-  if (d.dec){ const id=d.dec; P.basket[id]--; if (P.basket[id]<=0){ delete P.basket[id]; delete P.checked[id]; } save(); render(); return; }
-  if (t.id==="clear"){ P.basket={}; P.checked={}; save(); render(); return; }
-  if (t.id==="rmchecked"){ Object.keys(P.checked).forEach(id=>delete P.basket[id]); P.checked={}; save(); render(); return; }
+  if (d.dec){ const id=d.dec, x=BY_ID[id]; P.basket[id]--; if (P.basket[id]<=0){ const c=P.checked[id]; delete P.basket[id]; delete P.checked[id]; save(); render();
+      toast(`Retiré de votre liste : ${esc(nameOf(x))}.`, ()=>{ P.basket[id]=1; if (c) P.checked[id]=1; save(); render(); }); return; }
+    save(); render(); return; }
+  if (t.id==="qclr"){ setQ(""); render(); document.getElementById("q").focus(); return; }
+  if (t.id==="clear"){ const b={...P.basket}, c={...P.checked}; P.basket={}; P.checked={}; save(); render(); toast("Liste vidée.", ()=>{ P.basket=b; P.checked=c; save(); render(); }); return; }
+  if (t.id==="rmchecked"){ const b={...P.basket}, c={...P.checked}; Object.keys(P.checked).forEach(id=>delete P.basket[id]); P.checked={}; save(); render();
+    toast("Articles cochés retirés.", ()=>{ P.basket=b; P.checked=c; save(); render(); }); return; }
   if (t.id==="copy"){
     const txt=listText(), msg=document.getElementById("copymsg");
-    navigator.clipboard.writeText(txt).then(()=>{ msg.hidden=false; msg.textContent="Liste copiée. Collez-la dans WhatsApp ou Notes."; })
-      .catch(()=>{ msg.hidden=false; msg.innerHTML=`<textarea readonly rows="8" style="width:100%;font:13px var(--f-mono)">${esc(txt)}</textarea>`; msg.querySelector("textarea").select(); });
+    navigator.clipboard.writeText(txt).then(()=>{ msg.textContent="Liste copiée. Collez-la où vous voulez : Notes, WhatsApp, un message…"; })
+      .catch(()=>{ msg.innerHTML=`Copie automatique impossible ici. Sélectionnez le texte ci-dessous :<textarea readonly rows="8" style="display:block;width:100%;margin-top:6px;font:13px var(--f-body)">${esc(txt)}</textarea>`; msg.querySelector("textarea").select(); });
   }
 });
 document.addEventListener("change", e=>{
   const t = e.target;
   if (t.id==="sort"){ state.sort=t.value; render(); return; }
   if (t.id==="min"){ state.min=+t.value; render(); return; }
-  if (t.id==="nb"){ P.nb = t.checked; save(); render(); return; }
+  if (t.id==="nb"){ P.nb = t.checked; save(); render(); toast(P.nb ? "Nutri-Boost activé : les références Delhaize A et B comptent avec −10 %." : "Nutri-Boost désactivé."); return; }
   if (t.dataset.check){ if (t.checked) P.checked[t.dataset.check]=1; else delete P.checked[t.dataset.check]; save(); render(); return; }
-  if (t.dataset.fam){
-    const k = t.dataset.fam, cur = ST().filter(x=>x!==k);
-    P.staples = t.checked ? [...cur, k] : cur; save();
-    const h = document.querySelector(".edhead .hint"); if (h) h.textContent = `${P.staples.length} familles suivies. Le chiffre indique les promos de cette semaine.`;
-    renderSummary(); document.getElementById("n-staples").textContent = ITEMS.filter(x=>vis0(x)&&P.staples.includes(x.t)).length;
+  if (t.dataset.edf){ t.checked ? DRAFT.add(t.dataset.edf) : DRAFT.delete(t.dataset.edf); document.getElementById("ed-count").textContent = edCount(); }
+});
+// remember a category the user opened or closed (summary click also covers Enter and Space)
+document.addEventListener("click", e=>{ const s = e.target.closest("details.fam>summary"); if (s) state.open["f:"+s.parentNode.dataset.famD] = !s.parentNode.open; });
+document.addEventListener("keydown", e=>{
+  if (e.key==="Escape" && state.fopen && !document.querySelector("dialog[open]")){ state.fopen=false; render(); document.getElementById("fbtn").focus(); }
+  // arrow keys between tabs (tablist pattern)
+  if ((e.key==="ArrowRight"||e.key==="ArrowLeft") && e.target.classList && e.target.classList.contains("tab")){
+    const tabs=[...document.querySelectorAll(".tab")], i=tabs.indexOf(e.target), n=tabs[(i+(e.key==="ArrowRight"?1:-1)+tabs.length)%tabs.length];
+    n.focus(); n.click();
   }
 });
-document.addEventListener("toggle", e=>{ if (e.target.id==="topd") state.topOpen=e.target.open; }, true);
-document.addEventListener("keydown", e=>{ if (e.key==="Escape" && state.catOpen){ state.catOpen=false; render(); } });
-if (!window.claude) document.getElementById("savenote").textContent = "Vos essentiels, votre panier et les promos masquées restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.";
-let qT; document.getElementById("q").addEventListener("input", e=>{ clearTimeout(qT); qT=setTimeout(()=>{ state.q=e.target.value; render(); }, 120); });
+const SAVE_TXT = window.claude ? document.getElementById("savenote").textContent
+  : "Vos essentiels, votre liste et les offres masquées restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.";
+document.getElementById("savenote").textContent = SAVE_TXT; document.getElementById("help-save").textContent = SAVE_TXT;
+let qT; document.getElementById("q").addEventListener("input", e=>{ document.getElementById("qclr").hidden = !e.target.value; clearTimeout(qT); qT=setTimeout(()=>{ state.q=e.target.value; render(); }, 140); });
 render();
 </script>
