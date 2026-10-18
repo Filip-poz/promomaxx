@@ -2,7 +2,7 @@
 
 Les promos de la semaine chez **Delhaize** et **Carrefour Market** (Belgique), comparées au produit de marque du magasin le moins cher, dans le même magasin, au kilo, au litre ou à la pièce.
 
-**Site :** https://filip-poz.github.io/tableau-des-promos/
+**Site :** https://filip-poz.github.io/promomaxx/
 
 ## Ce que fait la page
 - **Vraie affaire** : au moins 15 % moins chère que la référence du même magasin (« 28 % moins cher que la référence Carrefour »). Une remise de −50 % sur un produit de marque qui reste plus cher que la marque du magasin n'en est pas une.
