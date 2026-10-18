@@ -12,3 +12,5 @@ docs/promo-board.html
 data.json
 promo-board.html
 .DS_Store
+__pycache__/
+.pytest_cache/

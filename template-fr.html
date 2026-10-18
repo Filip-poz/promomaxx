@@ -231,6 +231,72 @@ footer p{margin:6px 0}
   .brow .ph{width:46px;height:46px}.brow .ph img{width:40px;height:40px}
   .brow .r{grid-column:3;flex-direction:row;justify-content:space-between;align-items:center}
 }
+
+/* price block: what you pay, for how many, per unit, regular price, condition */
+.pblk{display:flex;flex-direction:column;gap:1px;font-variant-numeric:tabular-nums;min-width:0}
+.ptot{font:700 16px var(--f-mono);line-height:1.25}
+.ptot .pq{font:600 12.5px var(--f-body);color:var(--muted)}
+.psub{font:500 11.5px var(--f-mono);color:var(--ink);overflow-wrap:anywhere}
+.preg{font-size:11.5px;color:var(--muted)}
+.pcond{font:600 12px var(--f-body);color:var(--tag-ink);background:color-mix(in srgb,var(--tag) 35%,transparent);border-radius:4px;padding:1px 6px;margin-top:3px;align-self:flex-start}
+.pcond.warn{color:var(--warn);background:var(--warn-bg);font-weight:500}
+.row .price .pblk{align-items:flex-end;text-align:right}
+.st{font:600 11px var(--f-body);letter-spacing:.02em}
+.st.d{color:var(--dlh)} .st.c{color:var(--car)}
+.verdict.none{color:var(--muted);background:var(--bg);border:1px solid var(--line);font-weight:500}
+.verdict.same{color:var(--ink);background:var(--bg);border:1px solid var(--line)}
+details.why{font-size:12px;color:var(--muted);margin-top:2px}
+details.why>summary{cursor:pointer;font-weight:600;color:var(--car);width:max-content;list-style:none}
+details.why>summary::-webkit-details-marker{display:none}
+details.why>summary::before{content:"▸ ";font-size:10px}
+details.why[open]>summary::before{content:"▾ "}
+details.why ul{margin:4px 0 0;padding-left:16px;display:grid;gap:3px}
+details.why b{color:var(--ink);font-weight:600}
+details.why a{color:inherit}
+.hbline details.why{flex-basis:100%}
+.reason{font:600 12px var(--f-body);color:var(--good);background:var(--good-bg);border-radius:6px;padding:3px 7px;line-height:1.3}
+
+/* compact header stats */
+.stats{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:13.5px;color:var(--muted);align-items:baseline}
+.stats .linkbtn{font-size:13.5px;padding:0}
+.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+.how{margin-top:0}
+
+/* filters panel */
+.fbtn{position:relative;font:600 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 28px 8px 12px;border-radius:8px;cursor:pointer}
+.fbtn::after{content:"";position:absolute;right:11px;top:50%;width:6px;height:6px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:translateY(-70%) rotate(45deg);opacity:.7}
+.fbtn[aria-expanded="true"]::after{transform:translateY(-20%) rotate(-135deg)}
+.fbtn .n{font:700 11px var(--f-mono);background:var(--ink);color:var(--bg);border-radius:999px;padding:1px 6px;margin-left:6px}
+.fpanel{margin-top:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.fpanel[hidden]{display:none}
+.fpanel .prefs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.activef{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.activef:empty{display:none}
+.activef .chip{min-height:28px;padding:3px 10px;font-size:12.5px}
+.activef .chip::after{content:" ✕";opacity:.6}
+.empty-s{color:var(--muted);padding:6px 0 14px;margin:0}
+.sm{display:none}
+.card .cdeal .tag{white-space:normal;max-width:100%;line-height:1.3}
+
+/* basket quantity conditions */
+.qwarn{font-size:12px;color:var(--warn);background:var(--warn-bg);border-radius:6px;padding:3px 8px;margin-top:4px;display:inline-block}
+.qwarn .linkbtn{font-size:12px;padding:0;margin-left:4px}
+.qok{font-size:12px;color:var(--good)}
+@media (max-width:640px){
+  .stats{font-size:13px;gap:2px 12px}
+  header h1{font-size:26px}
+  .weeks{font-size:12px;gap:2px 12px;margin-top:4px}
+  .controls input[type=search]{flex-basis:100%}
+  .ptot{font-size:15px}
+  .lg,.r2{display:none} .sm{display:inline}
+  .tabs{flex-wrap:nowrap}
+  .tab{padding:7px 12px;font-size:13.5px}
+  .controls{gap:6px}
+  .seg button{padding:8px 8px;font-size:12.5px}
+  .fbtn{padding:8px 26px 8px 10px;margin-left:auto}
+  details.topd>summary{font-size:16px}
+  details.topd>summary .hint{font-size:12px}
+}
 </style>
 
 <div class="wrap">
@@ -238,24 +304,24 @@ footer p{margin:6px 0}
     <h1>Tableau des promos</h1>
     <div class="weeks" id="weeks"></div>
     <p class="stale" id="stale" hidden></p>
+    <div class="stats" id="summary" aria-label="La semaine en un coup d'œil"></div>
     <details class="how" id="how">
       <summary>Comment ça marche</summary>
       <ol>
         <li><b>Chaque semaine</b>, les promos Delhaize et le folder Carrefour Market sont relevés sur les sites des magasins. Les offres expirées disparaissent toutes seules.</li>
-        <li><b>Vraie affaire :</b> chaque promo est comparée, au kilo, au litre ou à la pièce, à la marque maison la moins chère du même magasin. Une remise de −50 % sur un produit de marque qui reste plus cher que la marque maison n'est pas une vraie affaire.</li>
+        <li><b>Prix affiché :</b> ce que vous payez pour la quantité exigée par l'offre (« 13,98 € les 3 »), le prix par unité et au kilo ou au litre qui en découle, et le prix habituel.</li>
+        <li><b>Vraie affaire :</b> la promo coûte au moins 15 % de moins, au kilo, au litre ou à la pièce, que la marque maison la moins chère du même format dans le même magasin. Sans référence fiable, la page affiche « Pas de comparaison fiable » et ne met pas la promo en avant.</li>
         <li><b>Mes essentiels</b> part d'une liste de courses type. Touchez « Modifier mes essentiels » pour cocher vos produits, ou « Tout effacer » pour partir de zéro.</li>
-        <li><b>+</b> ajoute au panier : une liste de courses rangée par rayon, à cocher en magasin ou à copier. <b>✕</b> masque une promo qui ne vous intéresse pas.</li>
-        <li><b>Nutri-Boost</b> (carte SuperPlus Delhaize) : laissez-le activé si vous l'avez, sinon désactivez-le.</li>
+        <li><b>+</b> ajoute au panier la quantité exigée par l'offre : une liste de courses rangée par rayon, à cocher en magasin ou à copier. <b>✕</b> masque une promo qui ne vous intéresse pas.</li>
+        <li><b>Nutri-Boost</b> (carte SuperPlus Delhaize) : réglage dans « Filtres et tri ». Laissez-le activé si vous l'avez.</li>
       </ol>
     </details>
   </header>
 
-  <section class="summary" id="summary" aria-label="La semaine en un coup d'œil"></section>
-
   <div class="bar" id="bar">
     <div class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-view="staples">Mes essentiels<span class="n" id="n-staples"></span></button>
-      <button class="tab" role="tab" aria-selected="false" data-view="all">Toutes les promos<span class="n" id="n-all"></span></button>
+      <button class="tab" role="tab" aria-selected="true" data-view="staples"><span class="lg">Mes e</span><span class="sm">E</span>ssentiels<span class="n" id="n-staples"></span></button>
+      <button class="tab" role="tab" aria-selected="false" data-view="all">Toutes<span class="lg"> les promos</span><span class="n" id="n-all"></span></button>
       <button class="tab" role="tab" aria-selected="false" data-view="basket">Panier<span class="n" id="n-basket"></span></button>
     </div>
     <div id="filters">
@@ -266,23 +332,29 @@ footer p{margin:6px 0}
           <button data-store="d" aria-pressed="false"><span class="ring d"></span>Delhaize</button>
           <button data-store="c" aria-pressed="false"><span class="ring c"></span>Carrefour</button>
         </div>
-        <label class="nbt" for="nb"><input type="checkbox" id="nb" role="switch"><span class="sw" aria-hidden="true"></span>Nutri-Boost 10 %</label>
-        <div class="seg" role="group" aria-label="Affichage">
-          <button data-mode="cards" aria-pressed="true" title="Cartes">▦ Cartes</button>
-          <button data-mode="list" aria-pressed="false" title="Liste">☰ Liste</button>
+        <button class="fbtn" id="fbtn" data-fopen="1" aria-expanded="false" aria-controls="fpanel">Filtres<span class="lg"> et tri</span><span class="n" id="fcount" hidden></span></button>
+      </div>
+      <div class="activef" id="activef" aria-label="Filtres actifs"></div>
+      <div class="fpanel" id="fpanel" hidden>
+        <div class="pills" id="pills" aria-label="Trier et filtrer"></div>
+        <div class="chips" id="chips" role="group" aria-label="Rayons" hidden></div>
+        <div class="prefs">
+          <label class="nbt" for="nb"><input type="checkbox" id="nb" role="switch"><span class="sw" aria-hidden="true"></span>Nutri-Boost 10 %</label>
+          <div class="seg" role="group" aria-label="Affichage">
+            <button data-mode="cards" aria-pressed="true" title="Cartes">▦ Cartes</button>
+            <button data-mode="list" aria-pressed="false" title="Liste">☰ Liste</button>
+          </div>
         </div>
       </div>
-      <div class="pills" id="pills" aria-label="Trier et filtrer"></div>
-      <div class="chips" id="chips" role="group" aria-label="Rayons" hidden></div>
     </div>
   </div>
 
   <main id="view"></main>
 
   <footer>
-    <p><b>Vraie affaire :</b> de combien la promo est moins chère que la marque maison la moins chère du même magasin, au kilo, au litre ou à la pièce. Une marque maison en promo compte avec sa propre remise. Les « vraies affaires » mises en avant battent la marque maison d'au moins 15 %.</p>
-    <p><b>Calcul du pourcentage :</b> remise effective si vous achetez la quantité exigée par l'offre. 1+1 = 50 %, 2+1 = 33 %, 2e à −50 % = 25 %, 3+3 = 50 %, « 2 pour 5 € » comparé au prix normal.</p>
-    <p><b>Marque maison :</b> le produit Delhaize ou Carrefour (Carrefour, Classic, Simpl, No Brand…) le moins cher dans la même famille de produits, à son prix habituel. Les correspondances sont automatiques : vérifiez le format en rayon.</p>
+    <p><b>Trois chiffres distincts :</b> la <b>remise</b> (« soit −33 % ») compare le prix de l'offre au prix habituel du même produit, pour la même quantité. L'écart avec la <b>marque maison</b> (« 20 % sous la marque maison ») compare le prix au kilo, au litre ou à la pièce à la référence maison la moins chère du même format, dans le même magasin. Dans « Les meilleures affaires », à format égal, la promo au <b>prix unitaire le plus bas</b> passe en premier.</p>
+    <p><b>Calcul :</b> on paie la quantité exigée par l'offre. 1+1 = 2 pour le prix d'1 (−50 %), 2+1 = −33 %, 2e à −50 % = −25 %, 3e à −60 % = −20 %, « 3 pour 5 € » et « −6,99 € à l'achat de 3 » comparés à 3 fois le prix habituel. Quand l'offre peut porter sur un mélange de produits, le calcul suppose plusieurs exemplaires du même produit. Une offre illisible est affichée telle quelle, sans calcul.</p>
+    <p><b>Marque maison :</b> le produit Delhaize ou Carrefour (Carrefour, Classic, Simpl, No Brand…) le moins cher de la même famille, du même format (capsules ou moulu, liquide ou tablettes, sirop ou boisson, riz sec ou cuit…) et de la même unité, à son prix habituel. Les plats préparés ne servent jamais de référence pour un ingrédient. Une marque maison en promo n'est comparée qu'à une autre marque maison. En cas de doute : « Pas de comparaison fiable ».</p>
     <p><b>Nutri-Boost :</b> −10 % chez Delhaize sur les produits Nutri-Score A et B à prix normal. D'après nos tickets de caisse, il ne se cumule pas avec une promo. Le bouton applique donc les −10 % aux produits de marque maison Delhaize notés A ou B.</p>
     <p><b>Badges :</b> « À stocker » = produit qui se garde, au moins −33 % et au moins 15 % sous la marque maison. « Nouveau », « Souvent en promo » (3 semaines sur les 4 dernières, le prix normal est alors théorique) et « Prix de base en hausse » se basent sur l'historique des relevés précédents.</p>
     <p>✕ masque une promo jusqu'à la fin de l'offre. <span id="savenote">Vos essentiels, votre panier et les promos masquées sont enregistrés pour vous seul et synchronisés entre vos appareils quand la page est ouverte sur claude.ai.</span></p>
@@ -299,7 +371,7 @@ const UNIT = {kg:"kg", l:"l", pc:"pièce", dose:"dose", m:"m"};
 const CAT_ORDER = Object.keys(CATS);
 
 const eur = n => n.toFixed(2).replace(".",",")+" €";
-const num = n => (n<1?n.toFixed(3):n.toFixed(2)).replace(".",",");
+const num = n => (n<1?n.toFixed(3).replace(/(\.\d\d\d*?)0+$/,"$1"):n.toFixed(2)).replace(".",",");
 const pct = d => Math.round(d*100)+" %";
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -318,7 +390,8 @@ function dateOf(s){
 
 const ITEMS = DATA.items.map(x=>{
   const end = dateOf(x.e);
-  return Object.assign(x,{id:x.k, save:x.p*x.q*x.d, pay:x.p*x.q*(1-x.d), hay:norm(x.n+" "+x.b),
+  // one model everywhere: buy q packs at regular price p, pay tot (only when the offer was read reliably)
+  return Object.assign(x,{id:x.k, save: x.ok ? x.q*x.p - x.tot : 0, pay: x.ok ? x.tot : x.p, hay:norm(x.n+" "+x.b),
     end, left: end ? Math.round((end-TODAY)/864e5) : null, gone: end ? end < TODAY : false});
 });
 const BY_ID = Object.fromEntries(ITEMS.map(x=>[x.id,x]));
@@ -336,6 +409,8 @@ function tidy(){
   for (const id of Object.keys(P.checked)) if (!P.basket[id]) delete P.checked[id];
   if (Array.isArray(P.staples)) P.staples = P.staples.filter(k=>TYPES[k]); else P.staples = null;
   P.nb = P.nb !== false;
+  // basket v1 counted offer bundles (1 = "1+1", i.e. 2 packs); v2 counts packs. Same physical quantity, converted once.
+  if (P.bv !== 2){ for (const id of Object.keys(P.basket)) P.basket[id] = Math.max(1, Math.round(P.basket[id])) * (BY_ID[id].q || 1); P.bv = 2; }
 }
 tidy();
 let MODE = "cards";
@@ -380,39 +455,72 @@ function setSync(s){ const el=document.getElementById("sync"); if (el) el.textCo
 })();
 
 const ST = () => P.staples || DATA.staples;
-let state = {view:"staples", store:"all", cat:"all", q:"", sort:"beat", min:0, f:{}, open:{}, edit:false};
+let state = {view:"staples", store:"all", cat:"all", q:"", sort:"beat", min:0, f:{}, open:{}, edit:false, topOpen:true, fopen:false};
 
 // ---- house-brand verdict ----
+// Three separate ideas: x.d = discount vs the product's own regular price; x.beat = advantage vs a valid same-store
+// house-brand reference (null when there is none); lowest unit price among comparable alternatives (best deals only).
 function refOf(x, s){ return (s==="d" && P.nb && x.refb) ? x.refb : (x.ref ? x.ref[s] : null); }
 const rv = r => r.v * (P.nb && r.nb ? 0.9 : 1);
 function compute(x){
   const r = refOf(x, x.s); x.vd = null; x.gap = 0; x.beat = null;
-  if (r && x.ev){ const v = rv(r); x.vd = v < x.ev*0.97 ? "warn" : "good"; x.gap = 1 - Math.min(v,x.ev)/Math.max(v,x.ev); x.beat = 1 - x.ev/v; }
-  else if (x.hb) x.beat = x.d;
-  x.stock = STOCK.has(x.t) && x.d >= .33 && x.beat!=null && x.beat >= .15;
+  if (x.ok && r && x.ev){
+    const v = rv(r); x.beat = 1 - x.ev/v;
+    x.vd = x.beat >= .03 ? "good" : x.beat > -.03 ? "same" : "warn";
+    x.gap = x.vd==="warn" ? 1 - v/x.ev : x.beat;
+  }
+  x.stock = STOCK.has(x.t) && x.ok && x.d >= .33 && x.beat!=null && x.beat >= .15;
 }
-const rank = x => x.beat==null ? 1 + x.d : x.beat > 0 ? 3 + x.beat : x.beat;
+const rank = x => x.beat!=null ? (x.beat > 0 ? 3 + x.beat : x.beat) : x.ok ? 1 + x.d : .5;
 const isDeal = x => x.beat!=null && x.beat >= .15;
 const vis0 = x => !x.gone && !P.hidden[x.id];
+const perPhrase = (u, t) => ({kg:"au kilo", l:"au litre", pc:"à la pièce", m:"au mètre"})[u] || (u==="dose" ? (t==="lessive"||t==="vaisselle" ? "par lavage" : "par dose") : "unitaire");
+const uLbl = (u, t) => u==="dose" ? (t==="lessive"||t==="vaisselle" ? "lavage" : "dose") : (UNIT[u]||u);
 
 function refChip(r, s, short){
   const boosted = P.nb && r.nb;
-  return `<span class="hbref" title="${esc(r.n)}"><span class="ring ${s}"></span>${short?`<span>Marque maison</span>`:`<a href="${esc(r.l)}" target="_blank" rel="noopener">${esc(r.n)}</a>`} <b>${num(rv(r))} €/${UNIT[r.u]||r.u}</b>${boosted?'<span class="nbtag">NB</span>':""}</span>`;
+  return `<span class="hbref" title="${esc(r.n)}"><span class="ring ${s}"></span>${short?`<span>Marque maison</span>`:`<a href="${esc(r.l)}" target="_blank" rel="noopener">${esc(r.n)}</a>`} <b>${num(rv(r))} €/${uLbl(r.u)}</b>${boosted?'<span class="nbtag">NB</span>':""}</span>`;
 }
-function verdictTxt(x, short){
-  if (x.hb && !refOf(x,x.s)) return `<span class="verdict good">Marque maison en promo</span>`;
+function verdictTxt(x){
   if (x.vd==="warn") return `<span class="verdict warn">Marque maison ${pct(x.gap)} moins chère</span>`;
-  if (x.vd==="good") return `<span class="verdict good">${pct(x.gap)} sous la marque maison</span>`;
-  return "";
+  if (x.vd==="good") return `<span class="verdict good">${pct(x.beat)} sous la marque maison</span>`;
+  if (x.vd==="same") return `<span class="verdict same">Au prix de la marque maison</span>`;
+  return `<span class="verdict none">Pas de comparaison fiable</span>`;
+}
+// what you pay, for how many packs, per unit, and the regular price
+function priceHTML(x){
+  const per = (v, u) => v!=null && u ? `${num(v)} €/${uLbl(u, x.t)}` : "";
+  if (!x.ok) return `<div class="pblk"><div class="ptot">${eur(x.p)}</div><div class="preg">Prix habituel${x.v?` · ${per(x.v,x.uu)}`:""}</div><div class="pcond warn">Offre non interprétée : voir le magasin</div></div>`;
+  if (x.q>1) return `<div class="pblk"><div class="ptot">${eur(x.tot)} <span class="pq">les ${x.q}</span></div>
+    <div class="psub">${eur(x.pe)} / unité${x.ev?` · ${per(x.ev,x.uu)}`:""}</div>
+    <div class="preg">Prix habituel : ${eur(x.p)} / unité</div>
+    <div class="pcond">Acheter ${x.q} pour bénéficier de l'offre</div></div>`;
+  return `<div class="pblk"><div class="ptot">${eur(x.tot)}</div>${x.ev?`<div class="psub">${per(x.ev,x.uu)}</div>`:""}<div class="preg">Prix habituel : ${eur(x.p)}</div></div>`;
+}
+const NR = {type:"famille de produit non reconnue", unit:"le magasin ne donne pas de prix au kilo, au litre ou à la pièce",
+  form:"format non identifié (par exemple capsules ou moulu, liquide ou tablettes) : pas de référence", none:"aucune marque maison du même format et de la même unité dans ce magasin"};
+function detailsHTML(x){
+  const li = [], o = x.s==="d"?"c":"d", same = refOf(x, x.s), other = refOf(x, o);
+  const per = (v,u) => `${num(v)} €/${uLbl(u, x.t)}`;
+  li.push(`Offre en magasin : « ${esc(x.raw)} »${x.tier?`. Palier suivant : ${esc(x.tier)}`:""}`);
+  if (x.ok){
+    li.push(x.q>1 ? `${x.q} × ${eur(x.p)} = ${eur(x.q*x.p)} au prix habituel, <b>${eur(x.tot)}</b> avec l'offre : remise de ${pct(x.d)}.` : `${eur(x.p)} au prix habituel, <b>${eur(x.tot)}</b> avec l'offre : remise de ${pct(x.d)}.`);
+    if (x.mix) li.push(`Calcul pour ${x.q} exemplaires de ce produit. Si l'offre accepte un mélange, le total dépend des produits choisis.`);
+    if (x.ev) li.push(`Prix habituel ${per(x.v,x.uu)}, avec l'offre <b>${per(x.ev,x.uu)}</b>.`);
+  } else li.push(`Pas de calcul : ${esc(x.why||"conditions non reconnues")}.`);
+  if (x.fl) li.push(`Format comparé : ${esc(x.fl)}.`);
+  if (same) li.push(`Référence maison ${STORE[x.s]} : <a href="${esc(same.l)}" target="_blank" rel="noopener">${esc(same.n)}</a>, ${eur(same.p)}, <b>${per(rv(same),same.u)}</b> au prix habituel${P.nb&&same.nb?", Nutri-Boost −10 % inclus":""}.`);
+  else li.push(`Pas de comparaison fiable : ${x.ok ? NR[x.nr]||NR.none : "offre non interprétée"}.`);
+  if (other) li.push(`Chez ${STORE[o]} (pour info) : <a href="${esc(other.l)}" target="_blank" rel="noopener">${esc(other.n)}</a>, ${per(rv(other),other.u)}.`);
+  if (x.hb) li.push(`Produit de marque maison : sa remise porte sur son propre prix. Il n'est comparé qu'à une autre marque maison du même format.`);
+  return `<details class="why"><summary>Détails du calcul</summary><ul>${li.map(l=>`<li>${l}</li>`).join("")}</ul></details>`;
 }
 function hbLine(x){
-  if (!x.ref && !x.hb) return "";
   const same = refOf(x, x.s), other = refOf(x, x.s==="d"?"c":"d");
   const parts = [verdictTxt(x)];
   if (same) parts.push(refChip(same, x.s));
   if (other) parts.push(refChip(other, x.s==="d"?"c":"d"));
-  const h = parts.filter(Boolean).join("");
-  return h ? `<div class="hbline">${h}</div>` : "";
+  return `<div class="hbline">${parts.join("")}${detailsHTML(x)}</div>`;
 }
 function badges(x){
   const b = [];
@@ -435,6 +543,8 @@ const toolBtns = x => {
     `<button class="hidebtn" data-hide="${x.id}" aria-label="${hid?"Réafficher":"Masquer"} : ${esc(x.n)}" title="${hid?"Réafficher":"Masquer cette promo"}">${hid?"↺":"✕"}</button>`;
 };
 
+const storeLbl = x => `<span class="st ${x.s}">${STORE[x.s]}</span>`;
+const effTxt = x => x.ok ? `<span class="eff">soit −${pct(x.d)}</span>` : "";
 function cardHTML(x){
   const r = refOf(x, x.s);
   return `<article class="card ${x.s}${P.hidden[x.id]?" hid":""}">
@@ -442,51 +552,76 @@ function cardHTML(x){
     <div class="badges">${badges(x)}</div>
     <div class="tools">${toolBtns(x)}</div>
     <div class="cbody">
+      ${x.why1?`<div class="reason">${x.why1}</div>`:""}
       <a class="cn" href="${esc(x.l)}" target="_blank" rel="noopener" title="${esc(x.n)}">${esc(x.n)}</a>
-      <div class="cb">${esc(x.b)}${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}</div>
-      <div class="cdeal"><span class="tag">${esc(x.pr)}</span><span class="eff">≈ −${pct(x.d)}</span></div>
-      <div class="cprice"><span class="p">${eur(x.p)}</span><span class="u">${x.ev?`${num(x.ev)} €/${UNIT[x.uu]||x.uu}`:esc(x.u)}</span></div>
-      <div class="cvd">${verdictTxt(x)}${r?`<div class="cref"><span class="ring ${x.s}"></span>Marque maison <b>${num(rv(r))} €/${UNIT[r.u]||r.u}</b>${P.nb&&r.nb?' <span class="nbtag">NB</span>':""}</div>`:""}</div>
+      <div class="cb">${storeLbl(x)} · ${esc(x.b)}${x.z?` · ${esc(x.z)}`:""}${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}</div>
+      <div class="cdeal"><span class="tag">${esc(x.pr)}</span>${effTxt(x)}</div>
+      <div class="cprice">${priceHTML(x)}</div>
+      <div class="cvd">${x.why1?"":verdictTxt(x)}${r&&!x.why1?`<div class="cref"><span class="ring ${x.s}"></span>Marque maison <b>${num(rv(r))} €/${uLbl(r.u,x.t)}</b>${P.nb&&r.nb?' <span class="nbtag">NB</span>':""}</div>`:""}${detailsHTML(x)}</div>
     </div>
   </article>`;
 }
 function rowHTML(x){
-  const qtxt = x.q>1 ? `${x.q} pour ${eur(x.pay)}, économie <b>${eur(x.save)}</b>` : `économie <b>${eur(x.save)}</b>`;
   return `<div class="row ${x.s}${P.hidden[x.id]?" hid":""}">
     <a class="ph" href="${esc(x.l)}" target="_blank" rel="noopener" aria-label="Voir ${esc(x.n)} sur le site ${STORE[x.s]}">${x.img?`<img src="${x.img}" alt="" loading="lazy">`:`<span aria-hidden="true">${emOf(x)}</span>`}</a>
-    <div class="name"><div class="t"><a href="${esc(x.l)}" target="_blank" rel="noopener">${esc(x.n)}</a>${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}${x.hb?'<span class="mark">marque maison</span>':""}${badges(x)}</div><div class="b">${esc(x.b)} · ${emOf(x)} ${CATS[x.c][1]}${endTxt(x)}</div></div>
-    <div class="deal"><span class="tag">${esc(x.pr)}</span><span class="eff">≈ −${pct(x.d)} · ${qtxt}</span></div>
+    <div class="name">${x.why1?`<div class="reason" style="margin-bottom:3px">${x.why1}</div>`:""}<div class="t"><a href="${esc(x.l)}" target="_blank" rel="noopener">${esc(x.n)}</a>${x.ns?`<span class="ns ${x.ns}" title="Nutri-Score ${x.ns}">${x.ns}</span>`:""}${x.hb?'<span class="mark">marque maison</span>':""}${badges(x)}</div><div class="b">${storeLbl(x)} · ${esc(x.b)}${x.z?` · ${esc(x.z)}`:""} · ${emOf(x)} ${CATS[x.c][1]}${endTxt(x)}</div></div>
+    <div class="deal"><span class="tag">${esc(x.pr)}</span>${effTxt(x)}</div>
     <div class="add">${toolBtns(x)}</div>
-    <div class="price"><span class="p">${eur(x.p)}</span><span class="u">${x.ev?`${num(x.ev)} €/${UNIT[x.uu]||x.uu} après remise`:esc(x.u)}</span></div>
+    <div class="price">${priceHTML(x)}</div>
     ${hbLine(x)}
   </div>`;
 }
 const itemsHTML = list => MODE==="cards" ? `<div class="grid">${list.map(cardHTML).join("")}</div>` : `<div class="list">${list.map(rowHTML).join("")}</div>`;
 
+// ---- best deals: one per product family, only defensible comparisons ----
+// Within a family, alternatives of the same form and unit are compared on effective unit price;
+// across forms (capsules vs ground coffee) they are not comparable, so the stronger house-brand advantage wins.
+function topPicks(list){
+  const fam = {};
+  list.filter(x=>x.ok && isDeal(x) && x.ev).forEach(x=>{ (fam[x.t]=fam[x.t]||[]).push(x); });
+  const picks = [];
+  for (const items of Object.values(fam)){
+    const groups = {};
+    items.forEach(x=>{ const g = (x.f||"")+"|"+x.uu; (groups[g]=groups[g]||[]).push(x); });
+    let best = null;
+    for (const g of Object.values(groups)){
+      g.sort((a,b)=>a.ev-b.ev || b.beat-a.beat);
+      const c = g[0]; c.alts = g.length-1;
+      if (!best || c.beat > best.beat) best = c;
+    }
+    picks.push(best);
+  }
+  return picks.sort((a,b)=>b.beat-a.beat).slice(0,8);
+}
+function reasonOf(x){
+  const r = refOf(x, x.s);
+  return `${pct(x.beat)} sous la marque maison (${num(rv(r))} €/${uLbl(r.u,x.t)})` +
+    (x.alts ? `<span class="r2"><br>Meilleur prix ${perPhrase(x.uu,x.t)} sur ${x.alts+1} offres comparables</span>` : "");
+}
+
 // ---- filters & sorting ----
 const FILTERS = [
-  ["beat","Bat la maison", x=>x.beat!=null && x.beat>0],
+  ["beat","Bat la marque maison", x=>x.beat!=null && x.beat>0],
   ["soon","Bientôt fini", x=>x.left!=null && x.left<=1],
   ["nw","Nouveau", x=>!!x.nw],
   ["stock","À stocker", x=>x.stock],
 ];
 const MINS = [[25,"−25 % et plus"],[33,"−33 % et plus"],[50,"−50 % et plus"]];
-const SORTS = [["beat","Vraie affaire"],["disc","Remise"],["save","Économie €"],["unit","Prix/kg"],["price","Prix"]];
+const SORTS = [["beat","Vraie affaire"],["disc","Remise"],["save","Économie par offre"],["unit","Prix au kilo / litre"],["price","Prix à payer"]];
 function scope(base){
   const q = norm(state.q.trim());
   return base.filter(x=> !x.gone && (state.f.hidden ? !!P.hidden[x.id] : !P.hidden[x.id]) &&
     (state.store==="all"||x.s===state.store) && (!q || q.split(/\s+/).every(w=>x.hay.includes(w))));
 }
-const quick = x => x.d*100 >= state.min-.5 && FILTERS.every(([k,,fn])=>!state.f[k] || fn(x));
+const quick = x => (x.d||0)*100 >= state.min-.5 && FILTERS.every(([k,,fn])=>!state.f[k] || fn(x));
 const filtered = base => scope(base).filter(x=>(state.cat==="all"||x.c===state.cat) && quick(x));
 function sorter(a,b){
-  if (state.sort==="beat") return rank(b)-rank(a) || b.d-a.d;
-  if (state.sort==="disc") return b.d-a.d || b.save-a.save;
+  if (state.sort==="beat") return rank(b)-rank(a) || (b.d||0)-(a.d||0);
+  if (state.sort==="disc") return (b.d??-1)-(a.d??-1) || b.save-a.save;
   if (state.sort==="save") return b.save-a.save;
-  if (state.sort==="unit") return (a.ev??1e9)-(b.ev??1e9);
-  return a.p-b.p;
+  if (state.sort==="unit") return (a.uu||"~").localeCompare(b.uu||"~") || (a.ev??1e9)-(b.ev??1e9);
+  return a.pay-b.pay;
 }
-const byRank = list => [...list].sort((a,b)=>rank(b)-rank(a)||b.d-a.d);
 function minRef(list, s){
   let m=null; list.forEach(x=>{ const r=refOf(x,s); if (r && (!m || (r.u===m.u && rv(r)<rv(m)))) m=r; }); return m;
 }
@@ -505,6 +640,23 @@ function renderPills(base){
     FILTERS.filter(([k])=>k!=="nw"||DATA.hist).map(([k,l,fn])=>pill("data-flt",k,l,!!state.f[k],sc.filter(fn).length)).join("") +
     (nHidden||state.f.hidden ? pill("data-flt","hidden","Masquées",!!state.f.hidden,nHidden) : "") + `</div>`;
 }
+function activeFilters(){
+  const a = [];
+  if (state.cat!=="all") a.push(["cat", CATS[state.cat][0]+" "+CATS[state.cat][1]]);
+  if (state.min) a.push(["min", `−${state.min} % et plus`]);
+  FILTERS.forEach(([k,l])=>{ if (state.f[k]) a.push(["f:"+k, l]); });
+  if (state.f.hidden) a.push(["f:hidden","Promos masquées"]);
+  return a;
+}
+function renderActive(){
+  const a = activeFilters(), n = document.getElementById("fcount");
+  n.hidden = !a.length; n.textContent = a.length;
+  document.getElementById("fbtn").setAttribute("aria-expanded", state.fopen);
+  document.getElementById("fpanel").hidden = !state.fopen;
+  const sortTxt = state.sort!=="beat" ? `<span>Tri : ${esc(SORTS.find(o=>o[0]===state.sort)[1])}</span>` : "";
+  document.getElementById("activef").innerHTML = a.length || sortTxt ? sortTxt + a.map(([k,l])=>`<button class="chip" data-unf="${k}" aria-label="Retirer le filtre ${esc(l)}">${esc(l)}</button>`).join("") +
+    (a.length>1?`<button class="linkbtn" data-unf="all">Tout retirer</button>`:"") : "";
+}
 function renderChips(base){
   const sc = scope(base).filter(quick);
   const counts = {}; sc.forEach(x=>counts[x.c]=(counts[x.c]||0)+1);
@@ -520,7 +672,7 @@ function renderHeader(){
     const ends = {}; ITEMS.filter(x=>x.s===s&&x.end&&!x.gone).forEach(x=>{ const k=x.end.getTime(); ends[k]=(ends[k]||0)+1; });
     const tot = ITEMS.filter(x=>x.s===s&&!x.gone).length;
     const main = Object.entries(ends).filter(([,n])=>n>=Math.max(10,tot*.05)).map(([k])=>new Date(+k)).sort((a,b)=>a-b);
-    const txt = main.length>1 ? `offres jusqu'au ${main.map(fmtD).join(", ")} selon l'article` : main.length ? `folder jusqu'au ${fmtD(main[0])}` : "";
+    const txt = main.length ? `jusqu'au ${main.map(fmtD).join(" ou ")}` : "";
     parts.push(`<span><span class="ring ${s}"></span><b>${s==="d"?"Delhaize":"Carrefour Market"}</b> ${txt}</span>`);
   }
   parts.push(`<span>Relevé le ${fmtD(PULLED)}</span><span id="sync"></span>`);
@@ -533,24 +685,13 @@ function renderHeader(){
 
 function renderSummary(){
   const live = ITEMS.filter(vis0), stap = new Set(ST());
-  const sv = {d:0,c:0}, nf = {d:0,c:0};
-  for (const k of stap) for (const s of ["d","c"]){
-    const c = live.filter(x=>x.t===k && x.s===s && x.beat!=null && x.beat>0);
-    if (!c.length) continue; sv[s] += byRank(c)[0].save; nf[s]++;
-  }
-  const fam = [...stap].filter(k=>live.some(x=>x.t===k)).length;
-  const deals = live.filter(isDeal), soon = live.filter(x=>x.left!=null && x.left<=1), nw = live.filter(x=>x.nw);
-  const split = l => `<span style="color:var(--dlh)">${l.filter(x=>x.s==="d").length}</span> Delhaize · <span style="color:var(--car)">${l.filter(x=>x.s==="c").length}</span> Carrefour`;
-  document.getElementById("summary").innerHTML = `
-    <div class="sum"><div class="k">Économie possible sur vos essentiels</div>
-      <div class="v"><span style="color:var(--dlh)">${eur(sv.d)}</span> · <span style="color:var(--car)">${eur(sv.c)}</span></div>
-      <div class="s">La meilleure vraie affaire de chaque essentiel, par magasin (${nf.d} et ${nf.c} familles). ${fam} essentiels sur ${stap.size} en promo.</div></div>
-    <button class="sum" data-go="beat"><div class="k">Vraies affaires</div><div class="v" style="color:var(--good)">${deals.length}</div>
-      <div class="s">promos au moins 15 % sous la marque maison : ${split(deals)}</div><div class="go">Voir les vraies affaires →</div></button>
-    <button class="sum" data-go="soon"><div class="k">Finit bientôt</div><div class="v" style="color:var(--warn)">${soon.length}</div>
-      <div class="s">${soon.length?`offres qui se terminent aujourd'hui ou demain : ${split(soon)}`:"Rien ne se termine d'ici demain."}</div>${soon.length?`<div class="go">Voir →</div>`:""}</button>
-    <div class="sum"><div class="k">Promos cette semaine</div><div class="v">${live.length}</div>
-      <div class="s">${DATA.hist?`dont ${nw.length} nouvelles · `:""}${split(live)}</div></div>`;
+  const mine = live.filter(x=>stap.has(x.t) && isDeal(x)), deals = live.filter(isDeal), soon = live.filter(x=>x.left!=null && x.left<=1);
+  const pl = (n, one, many) => `<b>${n}</b> ${n>1?many:one}`;
+  document.getElementById("summary").innerHTML =
+    `<button class="linkbtn" data-go="top">${pl(mine.length,"vraie affaire","vraies affaires")} dans vos essentiels</button>` +
+    `<button class="linkbtn" data-go="beat">${pl(deals.length,"vraie affaire","vraies affaires")} au total</button>` +
+    (soon.length ? `<button class="linkbtn" data-go="soon">${pl(soon.length,"offre finit","offres finissent")} d'ici demain</button>` : "") +
+    `<span>${live.length} promos relevées${DATA.hist?` dont ${live.filter(x=>x.nw).length} nouvelles`:""}</span>`;
 }
 
 function editorHTML(){
@@ -576,6 +717,7 @@ function render(){
   document.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.mode===MODE));
   document.getElementById("nb").checked = P.nb;
   document.getElementById("filters").hidden = state.view==="basket" || state.edit;
+  renderActive();
   const v = document.getElementById("view");
 
   if (state.view==="all"){
@@ -592,20 +734,24 @@ function render(){
     if (state.edit){ v.innerHTML = editorHTML(); return; }
     const base = ITEMS.filter(x=>stap.has(x.t));
     renderPills(base); renderChips(base);
-    const top = filtered(base).filter(isDeal).sort((a,b)=>b.beat-a.beat).slice(0,MODE==="cards"?8:10);
+    const top = state.f.hidden ? [] : topPicks(scope(base));
     const per = MODE==="cards" ? 4 : 3;
     const groups = ST().map(k=>({k, all:scope(base.filter(x=>x.t===k)), items:filtered(base.filter(x=>x.t===k)).sort(sorter)})).filter(g=>g.items.length);
-    v.innerHTML = `<div class="stapbar"><span>${stap.size} familles suivies</span><button class="linkbtn" data-ed="open">Modifier mes essentiels</button></div>` +
-      (top.length && !state.f.hidden ? `<details class="topd" id="topd"${state.topOpen?" open":""}><summary>⭐ Vos ${top.length} meilleures affaires <span class="hint">jusqu'à ${pct(top[0].beat)} sous la marque maison</span></summary>${itemsHTML(top)}</details>` : "") +
+    top.forEach(x=>x.why1 = reasonOf(x));
+    const topHTML = state.f.hidden ? "" : `<details class="topd" id="topd"${state.topOpen?" open":""}><summary>⭐ Les meilleures affaires de vos essentiels <span class="hint">${top.length ? `${top.length} produit${top.length>1?"s":""}, un par famille, au moins 15 % sous une marque maison comparable` : "aucune cette semaine"}</span></summary>${
+      top.length ? itemsHTML(top) : `<p class="empty-s">Aucune promo de vos essentiels ne coûte clairement moins cher (au moins 15 %) qu'une marque maison comparable cette semaine${state.store!=="all"?` chez ${STORE[state.store]}`:""}. Les autres promos restent listées ci-dessous.</p>`}</details>`;
+    top.forEach(x=>delete x.why1);
+    v.innerHTML = topHTML + `<div class="stapbar"><span>${stap.size} familles suivies</span><button class="linkbtn" data-ed="open">Modifier mes essentiels</button></div>` +
       (groups.length ? groups.map(({k,all,items})=>{
-        const [em,label] = TYPES[k]; const b = byRank(all)[0];
-        const both = new Set(all.map(x=>x.s)).size===2;
+        const [em,label] = TYPES[k]; const b = topPicks(all)[0];
+        const stores = new Set(all.map(x=>x.s));
         const shown = state.open[k] ? items : items.slice(0,per);
         const rd = minRef(all,"d"), rc = minRef(all,"c");
+        const differs = all.some(x=>{ const r = refOf(x,x.s), m = x.s==="d"?rd:rc; return r && m && r.n!==m.n; });
         return `<section class="group"><h3>${em} ${esc(label)}
-          ${both?`<span class="winner ${b.s}"><span class="ring ${b.s}"></span>Meilleure affaire : ${STORE[b.s]}, ${esc(b.pr)}${b.beat>0?`, ${pct(b.beat)} sous la marque maison`:""}</span>`:`<span class="hint">uniquement chez ${STORE[all[0].s]}</span>`}
-          <span class="hint">${items.length} offre${items.length>1?"s":""}</span></h3>
-          ${rd||rc?`<div class="ghb">Marque maison la moins chère : ${rd?refChip(rd,"d"):""} ${rc?refChip(rc,"c"):""}</div>`:""}
+          ${b?`<span class="winner ${b.s}"><span class="ring ${b.s}"></span>Meilleure affaire : ${STORE[b.s]}, ${esc(b.pr)}, ${pct(b.beat)} sous sa marque maison</span>`:`<span class="hint">aucune vraie affaire vérifiée</span>`}
+          <span class="hint">${items.length} offre${items.length>1?"s":""}${stores.size===1?` · uniquement chez ${STORE[all[0].s]}`:""}</span></h3>
+          ${rd||rc?`<div class="ghb">Marque maison la moins chère de la famille : ${rd?refChip(rd,"d"):""} ${rc?refChip(rc,"c"):""}${differs?`<span>Chaque promo est comparée à la référence de son propre format (voir « Détails du calcul »).</span>`:""}</div>`:""}
           ${itemsHTML(shown)}
           ${items.length>per?`<button class="more" data-more="${k}">${state.open[k]?"Afficher moins":"Voir les "+items.length+" offres"}</button>`:""}</section>`;
       }).join("") : stap.size ? `<p class="empty">Aucun de vos essentiels ne correspond à ces filtres.</p>`
@@ -615,18 +761,31 @@ function render(){
   if (state.view==="basket") renderBasket(v);
 }
 
+// basket quantities are packs. Complete offer bundles get the offer price, the rest the regular price (prudent).
+function line(x, n){
+  if (!x.ok) return {pay:n*x.p, reg:n*x.p, save:0, rest:0};
+  const full = Math.floor(n/x.q), rest = n % x.q, pay = full*x.tot + rest*x.p;
+  return {pay, reg:n*x.p, save:n*x.p - pay, rest, full};
+}
+function qtyNote(x, n, l){
+  if (!x.ok) return `<span class="qwarn">Offre non interprétée : prix habituel compté</span>`;
+  if (x.q===1) return "";
+  if (n < x.q) return `<span class="qwarn">L'offre demande ${x.q} unités : ${n} au prix habituel<button class="linkbtn" data-setq="${x.id}" data-n="${x.q}">Passer à ${x.q}</button></span>`;
+  if (l.rest) return `<span class="qwarn">${n-l.rest} au prix de l'offre, ${l.rest} au prix habituel (estimation prudente)<button class="linkbtn" data-setq="${x.id}" data-n="${n - l.rest + x.q}">Passer à ${n - l.rest + x.q}</button></span>`;
+  return `<span class="qok">✓ ${l.full>1?`${l.full} fois l'offre`:"Quantité de l'offre"}</span>`;
+}
 function renderBasket(v){
   const ids = Object.keys(P.basket).filter(id=>BY_ID[id]);
-  if (!ids.length){ v.innerHTML = `<p class="empty">Votre panier est vide. Touchez <b>+</b> sur une promo pour préparer vos courses : le panier devient votre liste par magasin et par rayon, à cocher en magasin.</p>`; return; }
+  if (!ids.length){ v.innerHTML = `<p class="empty">Votre panier est vide. Touchez <b>+</b> sur une promo pour préparer vos courses : la quantité exigée par l'offre est ajoutée, et le panier devient votre liste par magasin et par rayon, à cocher en magasin.</p>`; return; }
   const tot = {d:{pay:0,save:0,n:0,left:0}, c:{pay:0,save:0,n:0,left:0}};
-  ids.forEach(id=>{ const x=BY_ID[id], n=P.basket[id], t=tot[x.s]; t.pay+=x.pay*n; t.save+=x.save*n; t.n++; if (!P.checked[id]) t.left++; });
-  const card = s => tot[s].n ? `<div class="sum"><div class="k"><span class="ring ${s}"></span>${STORE[s]}</div><div class="v">${eur(tot[s].pay)}</div><div class="s">${tot[s].n} article${tot[s].n>1?"s":""}${tot[s].left<tot[s].n?`, ${tot[s].left} à prendre`:""} · économie <b style="color:var(--good)">${eur(tot[s].save)}</b></div></div>` : "";
-  const row = x => { const n=P.basket[x.id], done=!!P.checked[x.id];
+  ids.forEach(id=>{ const x=BY_ID[id], l=line(x, P.basket[id]), t=tot[x.s]; t.pay+=l.pay; t.save+=l.save; t.n++; if (!P.checked[id]) t.left++; });
+  const card = s => tot[s].n ? `<div class="sum"><div class="k"><span class="ring ${s}"></span>${STORE[s]}</div><div class="v">${eur(tot[s].pay)}</div><div class="s">${tot[s].n} article${tot[s].n>1?"s":""}${tot[s].left<tot[s].n?`, ${tot[s].left} à prendre`:""} · ${eur(tot[s].save)} de moins qu'au prix habituel</div></div>` : "";
+  const row = x => { const n=P.basket[x.id], done=!!P.checked[x.id], l=line(x,n);
     return `<div class="brow ${x.s}${done?" done":""}">
       <label class="chk"><input type="checkbox" data-check="${x.id}" ${done?"checked":""} aria-label="Pris : ${esc(x.n)}"></label>
       <a class="ph" href="${esc(x.l)}" target="_blank" rel="noopener" aria-label="Voir ${esc(x.n)}">${x.img?`<img src="${x.img}" alt="" loading="lazy">`:`<span aria-hidden="true">${emOf(x)}</span>`}</a>
-      <div class="name"><div class="t">${esc(x.n)}${badges(x)}</div><div class="b">${esc(x.b)} · <b>${esc(x.pr)}</b> · ${x.q*n} pièce${x.q*n>1?"s":""} · payer ${eur(x.pay*n)}, économie <b style="color:var(--good)">${eur(x.save*n)}</b></div></div>
-      <div class="r"><span class="qty"><button data-dec="${x.id}" aria-label="Moins">−</button>${n}×<button data-inc="${x.id}" aria-label="Plus">+</button></span></div>
+      <div class="name"><div class="t">${esc(x.n)}${badges(x)}</div><div class="b">${esc(x.b)}${x.z?` · ${esc(x.z)}`:""} · <b>${esc(x.pr)}</b> · ${n} × ${eur(x.p)} = ${eur(l.reg)} au prix habituel, <b>${eur(l.pay)}</b> à payer${l.save>0.004?`, ${eur(l.save)} de moins`:""}</div>${qtyNote(x,n,l)}</div>
+      <div class="r"><span class="qty"><button data-dec="${x.id}" aria-label="Une unité de moins">−</button>${n}<button data-inc="${x.id}" aria-label="Une unité de plus">+</button></span></div>
     </div>`; };
   const sections = ["d","c"].filter(s=>tot[s].n).map(s=>{
     const mine = ids.map(id=>BY_ID[id]).filter(x=>x.s===s);
@@ -637,7 +796,7 @@ function renderBasket(v){
   }).join("");
   const nChecked = Object.keys(P.checked).length;
   v.innerHTML = `<div class="basket-sum">${card("d")}${card("c")}
-      <div class="sum"><div class="k">Économie totale</div><div class="v" style="color:var(--good)">${eur(tot.d.save+tot.c.save)}</div><div class="s">${tot.d.n&&tot.c.n?"Deux magasins cette semaine":"Un seul magasin cette semaine"}</div></div></div>
+      <div class="sum"><div class="k">Total à payer</div><div class="v">${eur(tot.d.pay+tot.c.pay)}</div><div class="s">${eur(tot.d.save+tot.c.save)} de moins que les mêmes quantités au prix habituel</div></div></div>
     ${sections}
     <div class="actions"><button class="btn primary" id="copy">Copier la liste de courses</button>${nChecked?`<button class="btn" id="rmchecked">Retirer ${nChecked>1?`les ${nChecked} articles cochés`:"l'article coché"}</button>`:""}<button class="btn" id="clear">Vider le panier</button></div>
     <p class="note" id="copymsg" hidden></p>`;
@@ -650,7 +809,8 @@ function listText(){
     out.push(`*${STORE[s].toUpperCase()}*`);
     CAT_ORDER.forEach(c=>{ const l = mine.filter(x=>x.c===c); if (!l.length) return;
       out.push(`${CATS[c][0]} ${CATS[c][1]}`);
-      l.forEach(x=>out.push(`- ${x.q*P.basket[x.id]}× ${x.n} (${x.b}) – ${x.pr}`)); });
+      l.forEach(x=>{ const n=P.basket[x.id], ln=line(x,n);
+        out.push(`- ${n}× ${x.n} (${x.b}) – ${x.pr} – ${eur(ln.pay)}${x.ok && ln.rest ? ` (offre pour ${x.q}, ${ln.rest} au prix habituel)` : ""}`); }); });
     out.push("");
   }
   return out.join("\n").trim();
@@ -668,7 +828,11 @@ document.addEventListener("click", e=>{
   if (d.sort){ state.sort=d.sort; render(); return; }
   if (d.min){ state.min = state.min===+d.min ? 0 : +d.min; render(); return; }
   if (d.flt){ state.f[d.flt]=!state.f[d.flt]; state.cat="all"; render(); return; }
+  if (d.go==="top"){ state.view="staples"; state.edit=false; state.topOpen=true; render(); const el=document.getElementById("topd"); if (el) el.scrollIntoView({block:"start"}); return; }
   if (d.go){ state.view="all"; state.cat="all"; state.f={[d.go]:true}; state.min=0; if (d.go==="beat") state.sort="beat"; state.edit=false; render(); toTop(); return; }
+  if (d.fopen){ state.fopen=!state.fopen; render(); return; }
+  if (d.unf){ if (d.unf==="all"){ state.cat="all"; state.min=0; state.f={}; } else if (d.unf==="cat") state.cat="all"; else if (d.unf==="min") state.min=0; else delete state.f[d.unf.slice(2)]; render(); return; }
+  if (d.setq){ P.basket[d.setq]=+d.n; save(); render(); return; }
   if (d.more){ state.open[d.more]=!state.open[d.more]; render(); return; }
   if (d.ed){
     if (d.ed==="open") state.edit=true;
@@ -677,7 +841,7 @@ document.addEventListener("click", e=>{
     if (d.ed==="clear"){ P.staples=[]; save(); }
     render(); if (d.ed==="open"||d.ed==="close") toTop(); return;
   }
-  if (d.add){ const id=d.add; if (P.basket[id]){ delete P.basket[id]; delete P.checked[id]; } else P.basket[id]=1; save(); render(); return; }
+  if (d.add){ const id=d.add; if (P.basket[id]){ delete P.basket[id]; delete P.checked[id]; } else P.basket[id]=BY_ID[id].ok ? BY_ID[id].q : 1; save(); render(); return; }
   if (d.hide){ const id=d.hide; if (P.hidden[id]) delete P.hidden[id]; else P.hidden[id]=1; save(); render(); return; }
   if (d.inc){ P.basket[d.inc]++; save(); render(); return; }
   if (d.dec){ const id=d.dec; P.basket[id]--; if (P.basket[id]<=0){ delete P.basket[id]; delete P.checked[id]; } save(); render(); return; }
@@ -704,7 +868,6 @@ document.addEventListener("change", e=>{
 });
 document.addEventListener("toggle", e=>{ if (e.target.id==="topd") state.topOpen=e.target.open; }, true);
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && state.catOpen){ state.catOpen=false; render(); } });
-try { if (!localStorage.getItem("promo-how")){ document.getElementById("how").open=true; localStorage.setItem("promo-how","1"); } } catch(_){}
 if (!window.claude) document.getElementById("savenote").textContent = "Vos essentiels, votre panier et les promos masquées restent dans ce navigateur, sur cet appareil. Rien n'est envoyé ailleurs.";
 let qT; document.getElementById("q").addEventListener("input", e=>{ clearTimeout(qT); qT=setTimeout(()=>{ state.q=e.target.value; render(); }, 120); });
 render();

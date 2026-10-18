@@ -1,8 +1,13 @@
-import json, re, sys, collections
+import json, re, sys, os, collections
+from promo import parse_offer, unit, typeof, form_of, is_dish, match_ref, TYPES, FORM_LABEL
 
-import os
-SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.abspath(__file__))
-OUT = sys.argv[2] if len(sys.argv) > 2 else SRC
+# python3 build.py [data-dir] [out-dir] [--rewrite-history]
+# history.json only gets a new snapshot for a new scrape date; rebuilding the page never touches it
+# unless --rewrite-history is given (e.g. to store corrected discounts for the current week).
+ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
+REWRITE_HIST = "--rewrite-history" in sys.argv
+SRC = ARGS[0] if ARGS else os.path.dirname(os.path.abspath(__file__))
+OUT = ARGS[1] if len(ARGS) > 1 else SRC
 D = json.load(open(f"{SRC}/delhaize-fr.json"))
 C = json.load(open(f"{SRC}/carrefour-fr.json"))
 CT = json.load(open(f"{SRC}/carrefour-photos.json"))
@@ -35,153 +40,43 @@ def refine(cat, name):
     if cat == "meat" and re.search(r"nocciolata|tartiner", n): return "sweet"
     return cat
 
-def unit(s):
-    m = re.search(r"([\d.,]+)\s*€\s*/\s*(kg|l|pièce|pc|stuk|st|dose|dosis|m)\b", s or "", re.I)
-    if not m: return None
-    u = m.group(2).lower()
-    u = {"pièce":"pc","stuk":"pc","st":"pc","dosis":"dose"}.get(u, u)
-    return (float(m.group(1).replace(",", ".")), u)
-
-def deal(p, price):
-    p = re.sub(r"\s+", " ", p.replace("_", " ")).strip()
-    m = re.match(r"(\d+) ?\+ ?(\d+)", p)
-    if m: a, b = int(m[1]), int(m[2]); return b/(a+b), a+b
-    m = re.match(r"(\d)(?:ème|e|de) (?:à|a|tegen|aan) -(\d+) ?%", p)
-    if m: n = int(m[1]); return int(m[2])/100/n, n
-    m = re.match(r"(\d+) = -(\d+) ?%", p)
-    if m: return int(m[2])/100, int(m[1])
-    m = re.match(r"-([\d.,]+) ?%(?: (?:pour|à l'achat de|voor) (\d+))?", p)
-    if m: return float(m[1].replace(",", "."))/100, int(m[2] or 1)
-    m = re.match(r"(\d+) (?:produits? |achetés )?(?:pour|voor|=) ?€? ?([\d.,]+) ?€?", p)
-    if m:
-        n, tot = int(m[1]), float(m[2].replace(",", "."))
-        return max(0, 1 - tot/(n*price)), n
-    m = re.match(r"- ?€? ?([\d.,]+) ?€?(?: (?:à l'achat de|pour|bij aankoop van) (\d+)?)?", p)
-    if m:
-        off = float(m[1].replace(",", ".")); n = int(m[2] or 1)
-        return min(.9, off/(n*price)), n
-    return 0, 1
-
-def pretty(p):
-    p = re.sub(r"\s+", " ", p.replace("_", " ")).strip()
-    p = re.sub(r"(\d) ?\+ ?(\d) ?(gratuit|gratis)?", r"\1+\2 gratuit", p)
-    p = re.sub(r"(\d)(?:ème|e) à ", r"\1e à ", p)
-    p = re.sub(r"(\d+) produits? pour €([\d.]+)", lambda m: f"{m[1]} pour {m[2].replace('.', ',')} €", p)
-    p = p.replace("-33.34%", "-33%")
-    return p.replace("-", "−")
-
-TYPES = [
- ("oeufs","🥚","Œufs",r"\boeufs?\b|œufs?",r"choco|pâques|pâtes|lasagne|nouilles|minuteur"),
- ("kefir","🥛","Kéfir",r"k[ée]fir",None),
- ("yaourt-grec","🥣","Yaourt grec & skyr",r"grec|skyr",r"feta|pita|sauce|tzatziki"),
- ("cottage","🥣","Cottage & fromage frais",r"cottage|fromage frais",None),
- ("mozzarella","🧀","Mozzarella",r"mozzarella",r"pizza|pané|sauce|chips|sticks|peperoncino"),
- ("burrata","🧀","Burrata & stracciatella",r"burrata|stracciatella",None),
- ("parmesan","🧀","Parmesan & grana",r"parmigiano|parmesan|grana padano|pecorino",r"chips|sauce|biscuit|pâtes"),
- ("raclette","🧀","Raclette",r"raclette",None),
- ("gouda","🧀","Gouda & fromage en tranches",r"gouda|tranches|emmental|leerdammer|fromage",r"frais|chèvre|cottage|raclette|burrata|mozzarella|parmigiano|pain|chips|pâtes|sauce|pizza"),
- ("chevre","🧀","Fromage de chèvre",r"chèvre|chavroux",None),
- ("creme","🥛","Crème",r"crème (fraîche|culinaire|entière|liquide|légère|\d)|\bcrème\b.*\d\d ?%|room",r"glacée|dessert|corps|mains|visage|douche|soin|hydrat|chocolat|marrons"),
- ("avoine","🌾","Boisson à l'avoine",r"boisson.*avoine|avoine.*boisson|barista|haver",r"flocons|biscuit|barre|granola"),
- ("beurre","🧈","Beurre & margarine",r"\bbeurre\b|margarine|benecol|pro activ",r"cacahu|biscuit|petit beurre|croissant|cookie|gaufre|sablé|pâte|karité|corps"),
- ("poulet","🍗","Poulet",r"poulet|chicken",r"style|végé|vegan|veggie|plant|soupe|bouillon|chips|pizza|nuggets|bowl|gyoza|dumpling|spring|wings|burger|pasta|salad|protein|curry|wrap|sandwich|croque"),
- ("saumon","🐟","Saumon",r"saumon",None),
- ("poisson","🐟","Poisson blanc",r"cabillaud|\bsole\b|églefin|colin|merlu|poisson",r"soupe|sauce|sticks|fish"),
- ("jambon","🥓","Jambon & charcuterie",r"jambon|prosciutto|serrano|coppa|salami|saucisson|mortadel|chorizo|lomo|fuet|cacciatore|jamón|ardennais",r"pizza|pâtes|croquette"),
- ("lardons","🥓","Lardons",r"lardons|guanciale",None),
- ("saucisses","🌭","Saucisses & chipolatas",r"chipolata|saucisse|boudin",r"végé|plant"),
- ("veggie","🌱","Alternatives végétales",r"végé|vegan|veggie|végétal|plant|falafel|tofu|chick.?n|vuna|vivera|garden gourmet",r"lait|boisson|beurre|margarine"),
- ("pizza","🍕","Pizza",r"pizza",r"sauce|fromage"),
- ("soupe","🍲","Soupe",r"soupe|potage|velouté",r"dumpling"),
- ("plats","🍲","Plats préparés",r"bowl|lasagne|vol-au-vent|vol au vent|bao|dumpling|gyoza|dim sum|spring roll|nuggets|wings|fish stick|curry.*riz|riz.*curry|traiteur",None),
- ("pates","🍝","Pâtes",r"spaghetti|tortiglioni|rigatoni|tortellini|ravioli|fusilli|penne|farfalle|macaroni|maccheroni|linguine|tagliatelle|orzo|gnocchi|bucatini|orecchiette|capellini|casarec|cavatappi|fettuc|pennoni|lumache|puntalette|fedelini|spaghettoni|pâtes",r"sauce|plat|bolognaise|pesto"),
- ("riz","🍚","Riz",r"\briz\b",r"galette|lait|soufflé|crème|curry|scampi|chocolat"),
- ("huile","🫒","Huile d'olive & huile",r"huile",r"corps|cheveux|soin|sèche"),
- ("tomates","🍅","Tomates en conserve & passata",r"passata|pulpe|coulis|tomates pelées|concassées|concentr|purée de tomate|polpa|tomates cerises|datterini|ciliegini",r"sauce"),
- ("sauce-pates","🍝","Sauces pour pâtes & pesto",r"sauce|pesto|sugo|bolognaise|arrabbiata",r"soja|poisson|huître|barbecue|ketchup|chips"),
- ("asiatique","🥥","Coco, curry & cuisine asiatique",r"coco|curry|pad thai|phad thai|ramen|nouilles|sauce.*poisson|huître|combava|keffir|citron vert",r"eau de coco|biscuit|chocolat|douche|shampo|déo|noix de coco râpée|bowl|scampi"),
- ("bonbons","🍬","Bonbons",r"bonbon|haribo|gomm|réglisse|sucette|chamallow|lutti|maoam|fruittella|chupa|frisk|pastilles|trolli|rebelle|fini",None),
- ("noix","🥜","Noix & fruits secs",r"noix|cajou|amande|pistache|cacahu|noisette|pécan|soja grillé|raisins",r"pâte à tartiner|chocolat au lait|beurre|déo|lait|biscuit|barre|douche|granola|candy|party|halloween"),
- ("chips","🥔","Chips",r"chips|tortilla|bugles",None),
- ("tartiner","🍯","Pâte à tartiner, miel & confiture",r"tartiner|nocciolata|cacahu.*(pâte|beurre)|beurre de cacahu|pâte de cacahu|miel|confiture|natù|tartimiel",r"pain d|épices|biscuit|bonbon"),
- ("sucre","🍬","Sucre & édulcorants",r"édulcor|edulcor|stevia|canderel|cankao|sucralose|sucre",r"sans sucre|zero|bonbon|chocolat"),
- ("barres","💪","Barres & protéines",r"barre|\bbar\b|protéin|protein",r"chocolat (noir|au lait) \d|tablette|pâtes|bowl|boisson"),
- ("chocolat","🍫","Chocolat",r"chocolat|côte d'or|galak|milka|kitkat|lion|pick up|kinder",r"boisson|chaud|céréales|pâte à tartiner|cookie|glace|bueno|croissant|donut|biscuit|koek"),
- ("biscuits","🍪","Biscuits",r"biscuit|petit beurre|beukelaer|speculoos|cookie|gaufre|bastogne|zoo|macaron|tarallucci|mulino|baiocchi|abbracci|canestrini|nascondini|pan di stelle|pain d'épices|koek",None),
- ("cafe","☕","Café",r"café|coffee|espresso|capsules|dosettes|grains",r"glacé|liqueur|chocolat|caramel latte"),
- ("the","🍵","Thé, thé glacé & kombucha",r"\bthé\b|ice tea|kombucha|lipton|yogi",None),
- ("cola","🥤","Sodas",r"cola|coke|fanta|sprite|limonade|soda|limonata|aranciata|ginger|pompelmo|vit-hit|sodastream",None),
- ("eau","💧","Eau",r"\beau\b|minérale|spa\b|volvic|pellegrino",r"de coco|toilette|javel|micellaire|parfum|limonata|aranciata"),
- ("jus","🧃","Jus & smoothies",r"\bjus\b|smoothie|swirl|tropicana",None),
- ("biere","🍺","Bières",r"bière|pils|leffe|jupiler|stella|duvel|tripel|karmeliet|chouffe|hoegaarden|corona|vedett|lutgarde|ypra|lefort|victoria|liefmans",None),
- ("spiritueux","🍸","Spiritueux, apéritifs & mocktails",r"\bgin\b|whisky|rhum|vodka|limoncello|fernet|sambuca|bitter|aperitivo|vermouth|martini|porto|cointreau|amaretto|sir james|mocktail|spritz|breezer|liqueur|bourbon",None),
- ("bulles","🥂","Cava, prosecco & champagne",r"cava|prosecco|crémant|champagne|sekt|mousseux|sparkling|brut",r"mocktail|spritz"),
- ("vin","🍷","Vins",r".",None),  # fallback for wine category only
- ("surgeles","❄️","Herbes & légumes surgelés",r"haché|hachée|ciboulette|persil|coriandre|basilic|ail|échalote|cerfeuil|légumes|romanesco|méditerran",r"sauce|pesto|chips|tomate"),
- ("glace","🍨","Glaces",r"glace|ice cream|sorbet|stick|barattolino|bueno",None),
- ("pain","🍞","Pain & viennoiserie",r"pain|baguette|bun|pistolet|sandwich|graankorf|croissant|donut|ardennais|grof",None),
- ("fruits","🍎","Fruits & légumes",r".",None),  # fallback for fresh
- ("papier","🧻","Papier toilette, essuie-tout & mouchoirs",r"papier toilette|toilette|essuie|rouleau|mouchoir",r"nettoy|gel|bloc"),
- ("vaisselle","🍽️","Lave-vaisselle & vaisselle",r"lave-vaisselle|vaisselle|finish|tablettes|capsules lave",None),
- ("lessive","👕","Lessive & adoucissant",r"lessive|adoucissant|détergent|lavage|pods|booster|parfum de linge|ariel|dash|lenor",None),
- ("nettoyant","🧽","Nettoyants & accessoires",r"nettoy|désinfect|lingettes|éponge|serpillière|swiffer|dégraiss|vileda|febreze|ambi pur|mr propre|textile|filtre|cylindre|sodastream",None),
- ("mains","🧼","Savon pour les mains",r"mains|handzeep|savon liquide|pompe",r"crème"),
- ("douche","🚿","Gel douche & bain",r"douche|savon|bain|lavant",r"bouche"),
- ("shampoing","🧴","Shampoing & soins cheveux",r"shampo|après-shampo|conditioner|masque|cheveux|capillaire|démêlant|spray",None),
- ("deo","🌬️","Déodorant",r"déo|anti-transpirant|bodyspray|body spray|transpirant",None),
- ("dentaire","🪥","Dentifrice & soins dentaires",r"dentifrice|brosse|bain de bouche|brossettes|fil dentaire|soft-picks|dentaire|bouche",None),
- ("rasage","🪒","Rasoirs & lames",r"rasoir|lames|rasage",None),
-]
-TYPE_CAT = {"vin":{"wine"}, "fruits":{"fresh"}}
 STAPLES = ["oeufs","kefir","yaourt-grec","cottage","mozzarella","burrata","parmesan","gouda","creme","avoine","beurre","poulet","saumon",
            "jambon","pates","riz","huile","tomates","asiatique","noix","chips","chocolat","tartiner","cafe","the","cola","biere","bulles",
            "papier","vaisselle","lessive","nettoyant","douche","mains","shampoing","deo","dentaire","rasage","fruits","surgeles"]
-CTYPE = [(k, e, l, re.compile(r, re.I), re.compile(x, re.I) if x else None) for k, e, l, r, x in TYPES]
-
-NONFOOD_T = {"mains","papier","vaisselle","lessive","nettoyant","douche","shampoing","deo","dentaire","rasage"}
-NONFOOD_C = {"household","care"}
-def typeof(name, cat):
-    nf = cat in NONFOOD_C
-    for k, e, l, r, x in CTYPE:
-        if (k in NONFOOD_T) != nf: continue
-        if k in TYPE_CAT and cat not in TYPE_CAT[k]: continue
-        if k == "vin" or k == "fruits":
-            return k
-        if r.search(name) and not (x and x.search(name)):
-            return k
-    return None
 
 def clean_name(n):
     n = re.sub(r"\s*\|\s*", " · ", n).strip()
     return n[0].upper() + n[1:] if n else n
 
-items, unparsed = [], collections.Counter()
+items, skipped = [], collections.Counter()
+def add(s, p, offer_text, code, brand, cat, end, img, hb, link, ns, size):
+    o = parse_offer(offer_text, p["price"])
+    if o["kind"] == "nonprice" or (o["kind"] == "unknown" and not o["raw"]) or o["raw"].lower() == "nouveau":
+        skipped[o["raw"] or "(vide)"] += 1; return
+    name = clean_name(p["name"])
+    x = dict(s=s, n=name, b=brand, c=cat, p=p["price"], u=p.get("ppu") or "", z=size, k=s + code, code=code,
+             pr=o["label"], raw=o["raw"], e=end, ok=1 if o["ok"] else 0, q=o["q"], img=img, hb=hb, l=link, ns=ns)
+    if o["ok"]:
+        x.update(tot=o["tot"], pe=o["pe"], d=o["d"])
+        if o.get("mix"): x["mix"] = 1
+        if o.get("tier"): x["tier"] = o["tier"]
+    else:
+        x.update(q=1, d=None, why=o.get("why", ""))
+    items.append(x)
+
 for p in D["promos"]:
-    if not p.get("promo") or p.get("price") is None: continue
-    d, q = deal(p["promo"], p["price"])
-    if d <= 0: unparsed[p["promo"]] += 1; continue
-    cat = refine(D_MAP.get(p["cat"], "pantry"), p["name"])
-    items.append(dict(s="d", n=clean_name(p["name"]), b=p["brand"] or "Delhaize", c=cat, p=p["price"], u=p["ppu"] or "", z=p.get("size") or "",
-        k="d" + p["code"], pr=pretty(p["promo"]), raw=p["promo"], e=p["end"] or "", d=round(d, 4), q=q,
-        img=D["thumbs"].get(p["code"], ""), hb=(p["brand"] == "Delhaize"),
-        l="https://www.delhaize.be" + p["url"] if p.get("url") else "https://www.delhaize.be/fr/p/" + p["code"], ns=NS.get(p["code"], "")))
+    if p.get("price") is None or not p.get("promo"): continue
+    add("d", p, p["promo"], p["code"], p["brand"] or "Delhaize", refine(D_MAP.get(p["cat"], "pantry"), p["name"]), p["end"] or "",
+        D["thumbs"].get(p["code"], ""), p["brand"] == "Delhaize",
+        "https://www.delhaize.be" + p["url"] if p.get("url") else "https://www.delhaize.be/fr/p/" + p["code"], NS.get(p["code"], ""), p.get("size") or "")
 for p in C["promos"]:
     tags = p.get("tags") or ""
-    if not tags: continue
-    promo = tags.split(" Offre valable")[0].strip()
-    h = len(promo) // 2
-    if promo[:h].strip() == promo[-h:].strip(): promo = promo[:h].strip()
+    if not tags or p.get("price") is None: continue
     m = re.search(r"jusqu.au (\d\d/\d\d)", tags)
-    end = m[1] if m else ""
-    d, q = deal(promo, p["price"])
-    if d <= 0: unparsed[promo] += 1; continue
-    cat = refine(C_MAP.get(p["cat"], "pantry"), p["name"])
     key = (p.get("img") or "").replace("https://cdn.carrefour.eu/420_", "").replace(".webp", "")
-    brand = p["brand"]
-    items.append(dict(s="c", n=clean_name(p["name"]), b=brand, c=cat, p=p["price"], u=p["ppu"] or "", z="",
-        k="c" + p["id"], pr=pretty(promo), raw=promo, e=end, d=round(d, 4), q=q, img=CT.get(key, ""),
-        hb=bool(re.search(r"carrefour|simpl|no brand|produits blancs|the market", brand, re.I)),
-        l=f"https://www.carrefour.be/fr/{p['id']}.html", ns=""))
+    add("c", p, tags.split(" Offre valable")[0], p["id"], p["brand"], refine(C_MAP.get(p["cat"], "pantry"), p["name"]), m[1] if m else "",
+        CT.get(key, ""), bool(re.search(r"carrefour|simpl|no brand|produits blancs|the market", p["brand"], re.I)),
+        f"https://www.carrefour.be/fr/{p['id']}.html", "", "")
 
 # de-duplicate identical rows
 seen, uniq = set(), []
@@ -198,71 +93,48 @@ for x in items:
 
 for x in items:
     x["t"] = typeof(x["n"] + " " + x["b"], x["c"])
+    un = unit(x["u"])
+    x["f"] = form_of(x["t"], x["n"] + " " + x["b"], un[1] if un else None)
+    x["dish"] = is_dish(x["n"])
+    x["v"], x["uu"] = (un if un else (None, ""))
+    x["ev"] = round(x["v"] * x["pe"] / x["p"], 3) if un and x["ok"] else None
 
-# house brand reference: cheapest unit price per (store, type, unit)
-house = collections.defaultdict(list)
+# house-brand references, per store, typed and formed like the promos
+house = {"d": [], "c": []}
 for s, src in (("d", D["house"]), ("c", C["house"])):
     for h in src:
         if not h.get("price") or not h.get("ppu"): continue
         if s == "c" and re.search(r"home|baby", h.get("brand", ""), re.I): continue
         un = unit(h["ppu"])
         if not un: continue
-        t = typeof(h["name"] + " " + h.get("brand", ""), refine((D_MAP if s == "d" else C_MAP).get(h.get("cat"), "pantry"), h["name"]))
+        nm = h["name"] + " " + h.get("brand", "")
+        t = typeof(nm, refine((D_MAP if s == "d" else C_MAP).get(h.get("cat"), "pantry"), h["name"]))
         if not t or t in ("vin", "fruits"): continue
-        nb = s == "d" and NS.get(h.get("code"), "") in ("A", "B") and not h.get("promo")
-        link = f"https://www.delhaize.be/fr/p/{h['code']}" if s == "d" else f"https://www.carrefour.be/fr/{h['id']}.html"
-        house[(s, t, un[1])].append(dict(n=clean_name(h["name"]), p=h["price"], v=un[0], u=un[1], nb=nb, l=link))
+        code = h["code"] if s == "d" else h["id"]
+        house[s].append(dict(n=clean_name(h["name"]), p=h["price"], v=un[0], u=un[1], t=t, f=form_of(t, nm, un[1]), dish=is_dish(h["name"]),
+            code=code, nb=s == "d" and NS.get(code, "") in ("A", "B") and not h.get("promo"),
+            l=f"https://www.delhaize.be/fr/p/{code}" if s == "d" else f"https://www.carrefour.be/fr/{code}.html"))
+by_type = collections.defaultdict(list)
+for s in house:
+    for h in house[s]: by_type[(s, h["t"])].append(h)
 
-import unicodedata
-STOP = set("avec sans pour nature natur classic extra bio eco fairtrade pack mini maxi grand grande petit petite pièces piece pieces stuks fresh frais fraîche douce doux original gout goût saveur arôme assortiment selection sélection market carrefour delhaize simpl brand produits blancs bonbon barre chip chocolat sauce pate pates alimentaire confiture douche shampooing tartiner papier brosse dent creme boisson biscuit gaufre glace jambon fromage tranche gel lavant savon liquide tablette noir lait vegetal vegan veggie care protect soft essential women biere beer bouteille canette blonde lavage recharge refill fle bouteille".split())
-def toks(n):
-    n = unicodedata.normalize("NFD", n.lower()); n = "".join(c for c in n if unicodedata.category(c) != "Mn")
-    return {w for w in (v.rstrip("s") for v in re.findall(r"[a-z]{4,}", n)) if w not in STOP and len(w) > 3}
-BROAD = {"noix","sauce-pates","plats","biscuits","bonbons","chocolat","barres","spiritueux","vin","douche","shampoing","jambon","veggie",
-         "asiatique","gouda","parmesan","tartiner","cola","the","jus","nettoyant","surgeles","pain","glace","soupe","pizza","poulet",
-         "biere","bulles","sucre","dentaire","fruits","huile","lessive","creme","beurre"}
-FORMS = [re.compile(r, re.I) for r in (r"capsul|nespresso|dolce gusto|tassimo", r"dosette|\bpads?\b|senseo", r"\bgrains?\b|bonen",
-         r"brosse|éponge|\bgants?\b", r"hygi[eè]ne|intime|incontinen|adulte", r"mouchoir|tissue", r"sirop", r"vierge",
-         r"soluble|instant", r"olive", r"friture|frying|tournesol|colza|arachide", r"lingette", r"pods|capsules? lessive|caps\b",
-         r"bio\b", r"sans lactose|lactose free", r"light|0 ?%|zéro|zero")]
-def ref_for(x, s, boost=False):
-    un = unit(x["u"])
-    if not un or not x["t"]: return None
-    cands = [h for h in house.get((s, x["t"], un[1]), [])]
-    # ignore implausible matches far below or above the promo item's own unit price
-    lo, hi = (0.4, 2) if un[1] == "pc" else (0.15, 3)   # "€/pièce" mixes packs and units: stay close
-    cands = [h for h in cands if lo*un[0] <= h["v"] <= hi*un[0]]
-    # product form must agree (capsules vs ground coffee, olive vs frying oil...)
-    xf = [bool(f.search(x["n"])) for f in FORMS]
-    cands = [h for h in cands if [bool(f.search(h["n"])) for f in FORMS] == xf]
-    if not cands: return None
-    pt = toks(x["n"])
-    scored = [(len(pt & toks(h["n"])), h) for h in cands]
-    best_ov = max(o for o, _ in scored)
-    if best_ov == 0 and x["t"] in BROAD: return None
-    pool = [h for o, h in scored if o == best_ov]
-    eff = lambda h: h["v"]*(0.9 if boost and h["nb"] else 1)
-    pool.sort(key=eff)
-    h = pool[0]
+def out_ref(h):
+    if not h: return None
     r = dict(n=h["n"], p=h["p"], v=h["v"], u=h["u"], l=h["l"])
     if h["nb"]: r["nb"] = 1
     return r
 
 for x in items:
-    un = unit(x["u"])
-    x["ev"] = round(un[0]*(1-x["d"]), 3) if un else None
-    x["uu"] = un[1] if un else ""
-    x["ref"] = {s: ref_for(x, s) for s in ("d", "c")}
-    rb = ref_for(x, "d", True)
-    if rb and x["ref"]["d"] and rb["n"] != x["ref"]["d"]["n"]: x["refb"] = rb
-    if x["hb"]:
-        for key in ("ref", "refb"):
-            if key in x and x[key] and isinstance(x[key], dict):
-                tgt = x[key] if key == "refb" else x[key].get(x["s"])
-                if tgt and tgt.get("n") == x["n"]:
-                    if key == "ref": x["ref"][x["s"]] = None
-                    else: del x["refb"]
-    del x["raw"]
+    x["fl"] = " · ".join(FORM_LABEL.get(f, f) for f in (x["f"] or "").split("|") if f) if x["f"] else ""
+    x["ref"] = {s: out_ref(match_ref(x, by_type[(s, x["t"])])) for s in ("d", "c")}
+    rb = match_ref(x, by_type[("d", x["t"])], boost=True)
+    if rb and x["ref"]["d"] and rb["n"] != x["ref"]["d"]["n"]: x["refb"] = out_ref(rb)
+    # why there is no same-store reference (shown as "Pas de comparaison fiable")
+    if not x["ref"][x["s"]]:
+        x["nr"] = ("type" if not x["t"] else "unit" if not x["v"] else "form" if x["f"] is None else "none")
+    del x["code"], x["dish"]
+    if x["f"] is None: x["f"] = ""
+    if not x["ref"]["d"] and not x["ref"]["c"]: x["ref"] = {}
 
 # history: one compact snapshot per week in <data-dir>/history.json -> "new this week", "often on promo", "base price up"
 wk = (D.get("pulled") or "")[:10]
@@ -276,11 +148,14 @@ for x in items:
     seen_w = [hist[w][x["k"]] for w in prevs if x["k"] in hist[w]]
     if len(seen_w) >= 3: x["hx"] = len(seen_w)
     if any(x["p"] > old[0] * 1.03 for old in seen_w): x["up"] = 1
-if wk:
-    hist[wk] = {x["k"]: [x["p"], x["d"]] for x in items}
+if wk and (wk not in hist or REWRITE_HIST):
+    hist[wk] = {x["k"]: [x["p"], x["d"] or 0] for x in items}
     hist = {w: hist[w] for w in sorted(hist)[-12:]}
     try: json.dump(hist, open(HIST_PATH, "w"), separators=(",", ":"))
     except OSError: json.dump(hist, open(f"{OUT}/history.json", "w"), separators=(",", ":"))
+    print("history: snapshot", wk, "written")
+else:
+    print("history: unchanged (snapshot", wk, "already stored; --rewrite-history to replace it)")
 
 # non-perishables worth stocking up on at >= 33 % off
 STOCK = ["papier","vaisselle","lessive","nettoyant","douche","mains","shampoing","deo","dentaire","rasage","pates","riz","huile",
@@ -305,7 +180,8 @@ open(f"{OUT}/index.html", "w", encoding="utf-8").write(  # standalone web page (
     '</head><body style="margin:0">\n' + html + '\n</body></html>\n')
 print("items", len(items), "d", sum(x["s"]=="d" for x in items), "c", sum(x["s"]=="c" for x in items))
 print("with img", sum(bool(x["img"]) for x in items), "typed", sum(bool(x["t"]) for x in items))
-print("with same-store house ref", sum(bool(x["ref"][x["s"]]) for x in items), "any ref", sum(any(x["ref"].values()) for x in items))
-print("unparsed", unparsed.most_common(15))
+print("with same-store house ref", sum(bool(x["ref"].get(x["s"])) for x in items), "any ref", sum(bool(x["ref"]) for x in items))
+print("offer not interpreted", collections.Counter(x["raw"] for x in items if not x["ok"]).most_common(10))
+print("skipped (not a price offer)", skipped.most_common(10))
 print("untyped sample (first 15)", [x["n"] for x in items if not x["t"]][:15])
 print("type counts", collections.Counter(x["t"] for x in items).most_common())
