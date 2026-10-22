@@ -14,3 +14,4 @@ promo-board.html
 .DS_Store
 __pycache__/
 .pytest_cache/
+/index.html
