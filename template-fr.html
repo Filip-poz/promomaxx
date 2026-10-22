@@ -301,7 +301,7 @@ dialog.center{margin:auto;width:min(780px,calc(100vw - 32px));max-height:min(86d
 .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:4px}
 .lcard{display:flex;flex-direction:column;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
 .lcard .tag{align-self:flex-start}
-.lcard span{font-size:13.5px;color:var(--muted);line-height:1.4}
+.lcard span:not(.tag){font-size:13.5px;color:var(--muted);line-height:1.4}
 .lcard em{font-style:normal;font-weight:700;font-size:13.5px;color:var(--good);margin-top:auto}
 .three{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .three li{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;color:var(--ink)}
