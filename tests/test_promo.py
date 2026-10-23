@@ -403,3 +403,19 @@ def test_fmt_size(z, out):
 ])
 def test_pack_noun(name, size, noun):
     assert pack_noun(name, size) == noun
+
+
+def test_minced_meat_is_not_frozen_herbs():
+    assert typeof("Haché Spaghetti Bio", "meat") is None
+    assert typeof("Crème de la Crème Bio Épinards Hachés à la Crème 450 g", "fresh") == "surgeles"
+
+
+def test_house_brand_bio_and_creamed_spinach():
+    def item(n, b="", v=5.0):
+        t = typeof(n, "fresh")
+        return dict(n=n, b=b, t=t, f=form_of(t, n, "kg"), u="kg", uu="kg", v=v, dish=is_dish(n))
+    x = item("Crème de la Crème Bio Épinards Hachés à la Crème 450 g", "Iglo", 9.44)
+    plain, cream, bio = item("Classic' Épinards Hachés 1 kg", v=1.55), item("Épinards Hachés à la Crème 450 g", v=1.89), item("Épinards Hachés à la Crème 600 g", "Carrefour Bio", 4.98)
+    assert match_ref(x, [plain, cream, bio])["n"] == bio["n"]
+    y = item("Crème de la Crème Épinards Hachés à la Crème 450 g", "Iglo", 3.78)
+    assert match_ref(y, [plain, cream, bio])["n"] == cream["n"]

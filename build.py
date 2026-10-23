@@ -121,7 +121,7 @@ for s, src in (("d", D["house"]), ("c", C["house"])):
         t = typeof(nm, refine((D_MAP if s == "d" else C_MAP).get(h.get("cat"), "pantry"), h["name"]))
         if not t or t in ("vin", "fruits"): continue
         code = h["code"] if s == "d" else h["id"]
-        house[s].append(dict(n=clean_name(h["name"]), p=h["price"], v=un[0], u=un[1], t=t, f=form_of(t, nm, un[1]), dish=is_dish(h["name"]),
+        house[s].append(dict(n=clean_name(h["name"]), b=h.get("brand", ""), p=h["price"], v=un[0], u=un[1], t=t, f=form_of(t, nm, un[1]), dish=is_dish(h["name"]),
             code=code, nb=s == "d" and NS.get(code, "") in ("A", "B") and not h.get("promo"),
             l=f"https://www.delhaize.be/fr/p/{code}" if s == "d" else f"https://www.carrefour.be/fr/{code}.html"))
 by_type = collections.defaultdict(list)

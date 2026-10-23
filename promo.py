@@ -195,6 +195,7 @@ TYPE_CAT = {
  "biere":{"beer","drinks"}, "spiritueux":{"beer","drinks","wine"}, "bulles":{"wine","drinks","beer"},
  "chips":{"snacks","pantry"}, "noix":{"snacks","pantry","fresh"},
  "papier":{"household","care"}, "vaisselle":{"household"}, "lessive":{"household"}, "nettoyant":{"household"},
+ "surgeles":{"frozen","fresh","pantry","snacks","dairy","ready"},  # "haché" also means minced meat
  "deo":{"care"}, "dentaire":{"care"}, "rasage":{"care"}, "shampoing":{"care"}, "douche":{"care"}, "mains":{"care","household"},
 }
 
@@ -299,6 +300,7 @@ FORMS = {
  "deo": [([("roll", r"roll|bille"), ("stick", r"stick|baume"), ("spray", r"spray|aérosol|atomiseur|deospray|bodyspray|\d+ ?ml")], None)],
  "dentaire": [([("recharge", r"brossettes|recharges?\b|têtes?\b|\bio\b"), ("inter", r"soft-picks|interdent|fil dentaire|flosser"), ("brosse", r"brosse|bosse|brush"), ("bain", r"bain de bouche|mouthwash|listerine"),
                ("dentifrice", r"dentifrice|dentrifice|toothpaste|sérum|gel")], None)],
+ "surgeles": [([("creme", r"crème|creme"), ("nature", r".")], None)],
  "rasage": [([("lames", r"lames|recharge|cartouche"), ("mousse", r"mousse|gel|crème|baume|after"), ("rasoir", r"rasoir|razor")], None)],
  "asiatique": [([("coco", r"lait de coco|crème de coco|coco milk|\bcoco\b"), ("nouilles", r"nouilles|ramen|noodles|udon|soba"),
                 ("pate", r"pâte|paste"), ("sauce", r"sauce|soja|teriyaki|sriracha")], None)],
@@ -367,7 +369,8 @@ def comparable(x, h):
     if h["f"] != x["f"]: return "format"
     if h["u"] != x["uu"]: return "unité"
     if h["dish"] != x["dish"]: return "plat préparé"
-    if [bool(a.search(h["n"])) for a in ATTRS] != [bool(a.search(x["n"])) for a in ATTRS]: return "attribut"
+    hn, xn = h["n"] + " " + h.get("b", ""), x["n"] + " " + x.get("b", "")   # "Carrefour Bio" carries bio in the brand
+    if [bool(a.search(hn)) for a in ATTRS] != [bool(a.search(xn)) for a in ATTRS]: return "attribut"
     lo, hi = (0.4, 2.0) if x["uu"] == "pc" else (0.15, 3.0)   # "€/pièce" mixes packs and units: stay close
     if not (lo * x["v"] <= h["v"] <= hi * x["v"]): return "prix unitaire hors plage"
     return None
