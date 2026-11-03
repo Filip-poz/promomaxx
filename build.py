@@ -13,6 +13,8 @@ D = json.load(open(f"{SRC}/delhaize-fr.json"))
 C = json.load(open(f"{SRC}/carrefour-fr.json"))
 CT = json.load(open(f"{SRC}/carrefour-photos.json"))
 NS = json.load(open(f"{SRC}/delhaize-nutriscore.json"))
+if not re.match(r"\d{4}-\d\d-\d\d", D.get("pulled") or ""):  # without it history and prices silently skip the week
+    sys.exit("delhaize-fr.json has no 'pulled' date: rescrape with the current scrape-browser.js")
 
 CATS = {  # key: (emoji, label)
  "fresh":("🥬","Fruits & légumes"), "meat":("🥩","Viande, poisson & veggie"), "dairy":("🧀","Crèmerie & fromage"),
