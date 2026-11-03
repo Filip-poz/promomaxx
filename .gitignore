@@ -16,3 +16,4 @@ promo-board.html
 __pycache__/
 .pytest_cache/
 /index.html
+AGENTS.md
