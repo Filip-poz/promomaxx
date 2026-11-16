@@ -110,7 +110,7 @@ DISH = re.compile(r"\bwraps?\b|sandwich|panini|tramezz|"
                   r"\bsauce\b|pesto|vol.au.vent|wings|schnitzel|cordon|farci|garni|cuisiné|repas|\bsalad|lasagne (?:bolo|traiteur|légumes|saumon|épinards)", re.I)
 FILLED = re.compile(r"ravioli|tortellini|cappelletti|girasoli|agnolotti|mezzelune|fagottini|lasagne|cannelloni", re.I)
 INGREDIENT = {"oeufs","kefir","yaourt-grec","cottage","mozzarella","burrata","parmesan","raclette","gouda","chevre","creme","avoine",
-              "beurre","poulet","saumon","poisson","jambon","lardons","riz","huile","tomates","noix","pates"}
+              "beurre","poulet","saumon","poisson","jambon","lardons","riz","huile","tomates","noix","pates","tartiner"}
 
 TYPES = [
  # key, emoji, label, include regex, exclude regex
@@ -273,7 +273,8 @@ FORMS = {
              ("cuit", r"cuit|cotto|york|blanc|jambon|braisé|torchon")], None)],
  "pates": [([("farcies", r"ravioli|tortellini|cappelletti|girasoli|agnolotti|mezzelune|fagottini|\bfarci"), ("gnocchi", r"gnocchi"),
             ("fraiches", r"fraîch|fresh|frais\b"), ("sans-gluten", r"sans gluten|gluten free"),
-            ("completes", r"complet|integral|whole|épeautre|lentilles|pois chiche"), ("seches", r".")], None)],
+            ("oeufs", r"\boeufs?\b|œufs?|uovo|\beier"), ("epeautre", r"épeautre|epeautre|spelt"),
+            ("completes", r"complet|integral|whole|lentilles|pois chiche"), ("seches", r".")], None)],
  "tomates": [([("concentre", r"concentr"), ("passata", r"passata|coulis|purée|passée|tamisée"),
               ("pulpe", r"pulpe|concass|polpa|morceaux|\bdés\b|cubes"), ("entieres", r"pelées|entières|cerises|datterini|ciliegini")], None)],
  "yaourt-grec": [([("skyr", r"skyr"), ("grec", r".")], None), ([("arome", FLAV), ("nature", r".")], None)],
@@ -331,7 +332,7 @@ FORM_LABEL = {"caps":"capsules","pads":"dosettes","soluble":"soluble","grains":"
               "epaisse":"crème épaisse","mascarpone":"mascarpone","marg":"margarine","beurre":"beurre","barista":"barista",
               "tranches":"tranches","hache":"haché","cuisse":"cuisses","entier":"entier","filet":"filet","fume":"fumé","pane":"pané",
               "cru":"cru","cuit":"cuit","farcies":"pâtes farcies","fraiches":"pâtes fraîches","sans-gluten":"sans gluten","completes":"complètes",
-              "seches":"pâtes sèches","concentre":"concentré","passata":"passata","pulpe":"pulpe","entieres":"tomates entières",
+              "seches":"pâtes sèches","oeufs":"pâtes aux œufs","epeautre":"épeautre","concentre":"concentré","passata":"passata","pulpe":"pulpe","entieres":"tomates entières",
               "skyr":"skyr","grec":"yaourt grec","arome":"aromatisé","nature":"nature","mais":"maïs","tuiles":"tuiles","pdt":"pomme de terre",
               "miel":"miel","confiture":"confiture","cacahuete":"cacahuète","cacahuete-choco":"cacahuète-chocolat","gnocchi":"gnocchi","italien":"guanciale / pancetta","lardons":"lardons","cuits":"cuits","crus":"crus","dolcegusto":"Dolce Gusto","tassimo":"Tassimo","std":"","lait":"au lait","noir":"","canette":"canettes","bouteille":"bouteille","paprika":"paprika","bbq":"barbecue","poivre":"poivre","fromage":"fromage","chili":"piquant","vinaigre":"vinaigre","ketchup":"ketchup","pistache":"pistaches","cajou":"cajou","amande":"amandes","noisette":"noisettes","pecan":"pécan","macadamia":"macadamia","soja":"soja","melange":"mélange","noix":"noix","patisserie":"pâtisserie","aromatise":"assaisonnées","garni":"garni","legere":"légère","entiere":"entière","tablette":"tablette","recharge":"brossettes","inter":"interdentaire","choco":"pâte chocolat","champagne":"champagne","mousseux":"mousseux",
               "mouchoirs":"mouchoirs","essuie":"essuie-tout","toilette":"papier toilette","apres":"après-shampoing","masque":"masque",

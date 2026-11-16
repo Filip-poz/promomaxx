@@ -118,6 +118,8 @@ def test_unit_parsing():
     ("Yaourt à boire · Fraise Benecol", "dairy", "beurre"),
     ("Cornet Vanille Café Delhaize", "frozen", "cafe"),
     ("Extra Yaourt à la Grecque Stracciatella 4 x 150 g", "dairy", "burrata"),
+    ("Tarte Salée Chèvre Lardons au Miel 0,375 kg", "ready", "tartiner"),
+    ("Extra Feuilletés au Chèvre au Miel 2 x 50 g", "ready", "tartiner"),
 ])
 def test_classification_mistakes(name, cat, not_t):
     assert typeof(name, cat) != not_t
@@ -158,6 +160,8 @@ def test_classification_positive(name, cat, t):
     ("noix", "Pistaches · Poivre et sel", "Cacahuètes · Poivre-Sel"),
     ("creme", "Crème · 20% M.G.", "Crème · Entière · 35%"),
     ("the", "Thé vert · Energy · 17S · Bio", "Ice Tea au goût de pêche 4x250ml"),
+    ("pates", "Pâtes · Quick · Macaroni · Coupé", "Macaroni · oeufs"),
+    ("pates", "Spaghetti complet", "Pâtes · Spaghetti · Complet · Epeautre"),
 ])
 def test_forms_that_must_not_compare(t, a, b):
     fa, fb = form_of(t, a), form_of(t, b)
