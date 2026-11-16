@@ -43,7 +43,7 @@ window._prog = {ok:0, fail:0, done:false};
   const H = {'x-apollo-operation-name':'ProductList','content-type':'application/json'};
   const mk = p => 'https://www.delhaize.be/api/v1/?operationName=ProductList&variables=' + encodeURIComponent(JSON.stringify({productListingType:"PROMOTION_SEARCH",lang:"fr",productCodes:"",categoryCode:"",excludedProductCodes:"",brands:"",keywords:"",productTypes:"",lazyLoadCount:50,pageNumber:p,sort:"categoryOrder",searchQuery:"",hideProductsWithoutPromo:false,hideUnavailableProducts:false,maxItemsToDisplay:0,includePotentialActivatableOffers:true,customerSegment:"newPromoPageSegment"})) + '&extensions=' + encodeURIComponent(JSON.stringify({persistedQuery:{version:1,sha256Hash:"ef54fc2d8da4a9ad4987b2fb18f61c59f341d018be0f4670b0c9c7dabff07e5c"}}));
   const all = []; window._NS = {};
-  for (let p = 0; p < 30; p++) { const r = await fetch(mk(p), {headers:H}).then(r => r.json()); const ps = r.data ? r.data.productList.products : []; if (!ps.length) break; all.push(...ps); }
+  for (let p = 0; p < 80; p++) {   // 16/11/2026 had 39 pages; the old cap of 30 silently dropped ~350 promos const r = await fetch(mk(p), {headers:H}).then(r => r.json()); const ps = r.data ? r.data.productList.products : []; if (!ps.length) break; all.push(...ps); }
   const seen = new Set();
   window._DFR = all.filter(x => !seen.has(x.code) && seen.add(x.code)).map(x => {
     const pr = (x.potentialPromotions||[])[0] || {}; const img = (x.images||[]).find(i => i.format === 'respListGrid');
